@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pandoc /Users/corentinghisalberti/Downloads/CMG_Agents_Cahier_des_charges.docx -o /tmp/cmg_cdc.md)",
+      "Bash(pip3 install:*)",
+      "Bash(npx create-next-app@14 . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm)",
+      "Bash(npx next:*)",
+      "Bash(git init:*)",
+      "Bash(cat /Users/corentinghisalberti/cmg_agent/src/app/api/actions/[id]/approve/route.ts)",
+      "Read(//private/tmp/**)",
+      "Bash(unzip -l /Users/corentinghisalberti/Downloads/CMG_Agents_Cahier_des_charges.docx)",
+      "Bash(unzip -p /Users/corentinghisalberti/Downloads/CMG_Agents_Cahier_des_charges.docx word/document.xml)",
+      "Bash(python3 -c \"import sys; from xml.dom import minidom; xml = sys.stdin.read\\(\\); dom = minidom.parseString\\(xml\\); print\\(dom.toprettyxml\\(\\)\\)\")",
+      "Bash(python3:*)",
+      "Bash(brew install:*)",
+      "Bash(pandoc -f docx -t plain)"
+    ]
+  }
+}
