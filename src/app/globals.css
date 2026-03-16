@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&display=swap');
-
 :root {
   --background: #FAFAF8;
   --foreground: #1A1A1A;
@@ -15,7 +13,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: 'Bai Jamjuree', system-ui, -apple-system, sans-serif;
+  font-family: inherit;
 }
 
 /* Smooth scrolling */

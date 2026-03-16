@@ -155,7 +155,7 @@ export default function AdminBillingPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       <PageHeader
-        icon={Coins}
+        icon={<Coins className="w-5 h-5 text-brand-500" />}
         title="Facturation — Vue admin"
         subtitle="Consommation de tous les clients et revenus"
       />
@@ -204,9 +204,9 @@ export default function AdminBillingPage() {
             <div>
               <p className="text-sm text-ink-400">Plan le plus populaire</p>
               <p className="text-lg font-bold text-ink-700 mt-1">
-                {planStats.sort((a, b) => b.count - a.count)[0]?.display_name || '—'}
+                {[...planStats].sort((a, b) => b.count - a.count)[0]?.display_name || '—'}
               </p>
-              <p className="text-xs text-ink-300">{planStats[0]?.count || 0} clients</p>
+              <p className="text-xs text-ink-300">{[...planStats].sort((a, b) => b.count - a.count)[0]?.count || 0} clients</p>
             </div>
             <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
               <TrendingUp className="h-5 w-5 text-purple-500" />

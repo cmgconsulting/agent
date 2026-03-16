@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { syncAnalyticsForClient } from '@/lib/social/analytics/aggregator'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * GET /api/cron/sync-social-analytics
  * Cron job: sync analytics for all clients with active social accounts.

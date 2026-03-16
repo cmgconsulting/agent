@@ -69,7 +69,8 @@ function Illustration({ type, className = '' }: { type: string; className?: stri
 }
 
 function isLucideIcon(icon: LucideIcon | ReactNode): icon is LucideIcon {
-  return typeof icon === 'function'
+  return typeof icon === 'function' ||
+    (typeof icon === 'object' && icon !== null && '$$typeof' in icon && 'render' in (icon as Record<string, unknown>))
 }
 
 export function EmptyState({

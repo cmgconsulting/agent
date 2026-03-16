@@ -12,12 +12,13 @@ interface PageHeaderProps {
     label: string
     onClick?: () => void
     href?: string
-    icon?: LucideIcon
+    icon?: LucideIcon | ReactNode
   }
 }
 
 function isLucideIcon(icon: LucideIcon | ReactNode): icon is LucideIcon {
-  return typeof icon === 'function'
+  return typeof icon === 'function' ||
+    (typeof icon === 'object' && icon !== null && '$$typeof' in icon && 'render' in (icon as Record<string, unknown>))
 }
 
 export function PageHeader({ icon, greeting, title, subtitle, action }: PageHeaderProps) {
@@ -53,12 +54,12 @@ export function PageHeader({ icon, greeting, title, subtitle, action }: PageHead
       {action && (
         action.href ? (
           <a href={action.href} className="btn-brand flex items-center gap-2">
-            {action.icon && <action.icon className="w-4 h-4" />}
+            {action.icon && (isLucideIcon(action.icon) ? (() => { const ActionIcon = action.icon as LucideIcon; return <ActionIcon className="w-4 h-4" /> })() : action.icon)}
             {action.label}
           </a>
         ) : (
           <button onClick={action.onClick} className="btn-brand flex items-center gap-2">
-            {action.icon && <action.icon className="w-4 h-4" />}
+            {action.icon && (isLucideIcon(action.icon) ? (() => { const ActionIcon = action.icon as LucideIcon; return <ActionIcon className="w-4 h-4" /> })() : action.icon)}
             {action.label}
           </button>
         )

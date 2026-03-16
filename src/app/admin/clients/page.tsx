@@ -24,7 +24,7 @@ export default async function ClientsListPage() {
         icon={<Users className="w-5 h-5 text-brand-500" />}
         title="Clients"
         subtitle={`${clients?.length || 0} clients enregistrés`}
-        action={{ label: 'Nouveau client', href: '/admin/clients/new', icon: Plus }}
+        action={{ label: 'Nouveau client', href: '/admin/clients/new', icon: <Plus className="w-4 h-4" /> }}
       />
 
       <div className="card p-0 overflow-hidden">

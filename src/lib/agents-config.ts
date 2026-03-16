@@ -1,4 +1,4 @@
-import type { AgentType, PlanType } from '@/types/database'
+import type { AgentType } from '@/types/database'
 
 export interface AgentConfig {
   type: AgentType
@@ -143,15 +143,19 @@ export const AGENTS: AgentConfig[] = [
   },
 ]
 
-export const PLAN_AGENTS_LIMIT: Record<PlanType, number> = {
+export const PLAN_AGENTS_LIMIT: Record<string, number> = {
+  basic: 3,
   starter: 3,
   pro: 8,
+  full: 8,
   enterprise: -1, // illimite
 }
 
-export const PLAN_LABELS: Record<PlanType, string> = {
+export const PLAN_LABELS: Record<string, string> = {
+  basic: 'Starter',
   starter: 'Starter',
   pro: 'Pro',
+  full: 'Enterprise',
   enterprise: 'Enterprise',
 }
 
