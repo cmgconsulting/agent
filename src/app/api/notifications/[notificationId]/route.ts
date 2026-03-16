@@ -6,6 +6,8 @@ import {
   isValidUUID,
 } from '@/lib/security'
 
+export const dynamic = 'force-dynamic'
+
 // ============================================
 // PATCH — Mark a notification as read
 // Body: { read: true }

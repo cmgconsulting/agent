@@ -5,6 +5,7 @@ import { buildAuthUrl } from '@/lib/social/oauth'
 import type { SocialPlatform } from '@/types/database'
 import crypto from 'crypto'
 
+export const dynamic = 'force-dynamic'
 const VALID_PLATFORMS: SocialPlatform[] = ['facebook', 'instagram', 'linkedin', 'twitter', 'tiktok', 'google_ads']
 
 /**

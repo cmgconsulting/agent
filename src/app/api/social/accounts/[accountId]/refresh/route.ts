@@ -5,6 +5,7 @@ import { decryptCredentials, encryptCredentials } from '@/lib/vault'
 import { refreshAccessToken } from '@/lib/social/oauth'
 import type { SocialPlatform } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 /**
  * POST /api/social/accounts/[accountId]/refresh
  * Force refresh the OAuth token for a social account.

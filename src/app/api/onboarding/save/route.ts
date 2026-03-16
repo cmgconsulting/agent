@@ -5,6 +5,7 @@ import { regenerateAgentPrompts, calculateOnboardingScore } from '@/lib/onboardi
 import { checkRateLimit, RATE_LIMITS } from '@/lib/security'
 import type { CompanyMemory } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || '' })
 
 // Structuring prompt for Claude API

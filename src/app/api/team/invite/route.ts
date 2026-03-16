@@ -8,6 +8,7 @@ import {
 } from '@/lib/security'
 import type { TeamRole } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 const VALID_INVITE_ROLES: TeamRole[] = ['manager', 'member', 'viewer']
 
 // ============================================

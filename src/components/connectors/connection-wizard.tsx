@@ -209,7 +209,7 @@ interface ConnectionWizardProps {
   onClose: () => void
 }
 
-export function ConnectionWizard({ connector, currentStatus, onSuccess, onClose }: ConnectionWizardProps) {
+export function ConnectionWizard({ connector, onSuccess, onClose }: ConnectionWizardProps) {
   const [step, setStep] = useState(1)
   const [credentials, setCredentials] = useState<Record<string, string>>({})
   const [testing, setTesting] = useState(false)

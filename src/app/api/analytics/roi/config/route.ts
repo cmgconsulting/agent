@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/security'
 
+export const dynamic = 'force-dynamic'
 // Default values returned when no roi_config exists yet
 const DEFAULT_HOURLY_COST_EUROS = 45
 const DEFAULT_CURRENCY = 'EUR'

@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { isValidUUID } from '@/lib/security'
 
+export const dynamic = 'force-dynamic'
 const DEFAULT_LIMIT = 20
 const MAX_LIMIT = 100
 

@@ -8,6 +8,7 @@ import {
 } from '@/lib/security'
 import type { FeedbackType } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 const VALID_FEEDBACK: FeedbackType[] = ['positive', 'negative']
 
 // ============================================

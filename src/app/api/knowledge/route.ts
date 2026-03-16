@@ -5,6 +5,7 @@ import { extractText, extractFromUrl } from '@/lib/knowledge/extract'
 import { chunkText } from '@/lib/knowledge/chunker'
 import type { KnowledgeCategory, KnowledgeFileType } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 const VALID_CATEGORIES: KnowledgeCategory[] = ['produits', 'services', 'technique', 'commercial', 'juridique', 'rh', 'autre']
 const VALID_FILE_TYPES: KnowledgeFileType[] = ['pdf', 'docx', 'txt', 'csv', 'md', 'xlsx', 'url']
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB

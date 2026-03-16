@@ -8,6 +8,7 @@ import {
 } from '@/lib/security'
 import type { PreferredTone, PreferredLength } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 const VALID_TONES: PreferredTone[]   = ['formel', 'decontracte', 'technique']
 const VALID_LENGTHS: PreferredLength[] = ['concis', 'detaille', 'exhaustif']
 

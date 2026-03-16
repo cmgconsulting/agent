@@ -2,6 +2,7 @@ import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supab
 import { NextResponse } from 'next/server'
 import { encryptCredentials } from '@/lib/vault'
 
+export const dynamic = 'force-dynamic'
 export async function PATCH(
   request: Request,
   { params }: { params: { connectorId: string } }

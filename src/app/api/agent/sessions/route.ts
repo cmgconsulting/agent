@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
 /**
  * GET /api/agent/sessions
  * Lists agent sessions for the current client.

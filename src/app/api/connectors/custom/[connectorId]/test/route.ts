@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { safeDecryptCredentials, executeApiRestCall } from '@/lib/connectors/custom-connector-utils'
 import { testMcpConnection } from '@/lib/connectors/mcp-client'
 
+export const dynamic = 'force-dynamic'
 export async function POST(
   _request: Request,
   { params }: { params: { connectorId: string } }

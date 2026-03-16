@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { isValidUUID } from '@/lib/security'
 
+export const dynamic = 'force-dynamic'
 // ============================================
 // GET — List steps for a workflow, ordered by step_order, with agent info
 // ============================================

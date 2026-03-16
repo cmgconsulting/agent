@@ -5,6 +5,7 @@ import { safeDecryptCredentials, executeApiRestCall, refreshOAuth2Token } from '
 import { callMcpTool } from '@/lib/connectors/mcp-client'
 import { encryptCredentials } from '@/lib/vault'
 
+export const dynamic = 'force-dynamic'
 export async function POST(
   request: Request,
   { params }: { params: { connectorId: string } }

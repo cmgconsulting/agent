@@ -75,18 +75,18 @@ export default async function AdminDashboard() {
   }
 
   const stats = [
-    { label: 'MRR estimé', value: `${mrr.toLocaleString('fr-FR')} €`, icon: DollarSign, color: 'bg-emerald-50', iconColor: 'text-emerald-500', trend: null },
-    { label: 'Clients actifs', value: `${activeClients}/${totalClients}`, icon: Users, color: 'bg-blue-50', iconColor: 'text-blue-500', trend: null },
-    { label: 'Agents actifs', value: totalAgentsActive, icon: Bot, color: 'bg-purple-50', iconColor: 'text-purple-500', trend: null },
-    { label: 'Connecteurs OK', value: totalConnectors, icon: Plug, color: 'bg-orange-50', iconColor: 'text-orange-500', trend: errorConnectors > 0 ? `${errorConnectors} erreur(s)` : null },
-    { label: 'Tokens (mois)', value: tokensThisMonth > 1000 ? `${Math.round(tokensThisMonth / 1000)}k` : tokensThisMonth, icon: Zap, color: 'bg-brand-50', iconColor: 'text-brand-500', trend: null },
-    { label: 'Actions en attente', value: pendingCount, icon: Clock, color: pendingCount > 0 ? 'bg-amber-50' : 'bg-surface-100', iconColor: pendingCount > 0 ? 'text-amber-500' : 'text-ink-300', trend: null },
+    { label: 'MRR estimé', value: `${mrr.toLocaleString('fr-FR')} €`, icon: <DollarSign className="w-5 h-5 text-brand-500" />, color: 'bg-emerald-50', iconColor: 'text-emerald-500', trend: null },
+    { label: 'Clients actifs', value: `${activeClients}/${totalClients}`, icon: <Users className="w-5 h-5 text-brand-500" />, color: 'bg-blue-50', iconColor: 'text-blue-500', trend: null },
+    { label: 'Agents actifs', value: totalAgentsActive, icon: <Bot className="w-5 h-5 text-brand-500" />, color: 'bg-purple-50', iconColor: 'text-purple-500', trend: null },
+    { label: 'Connecteurs OK', value: totalConnectors, icon: <Plug className="w-5 h-5 text-brand-500" />, color: 'bg-orange-50', iconColor: 'text-orange-500', trend: errorConnectors > 0 ? `${errorConnectors} erreur(s)` : null },
+    { label: 'Tokens (mois)', value: tokensThisMonth > 1000 ? `${Math.round(tokensThisMonth / 1000)}k` : tokensThisMonth, icon: <Zap className="w-5 h-5 text-brand-500" />, color: 'bg-brand-50', iconColor: 'text-brand-500', trend: null },
+    { label: 'Actions en attente', value: pendingCount, icon: <Clock className="w-5 h-5 text-brand-500" />, color: pendingCount > 0 ? 'bg-amber-50' : 'bg-surface-100', iconColor: pendingCount > 0 ? 'text-amber-500' : 'text-ink-300', trend: null },
   ]
 
   return (
     <div className="animate-fade-in">
       <PageHeader
-        icon={Activity}
+        icon={<Activity className="w-5 h-5 text-brand-500" />}
         title="Dashboard Admin"
         subtitle="Vue d'ensemble de la plateforme CMG Agents"
         action={{ label: '+ Nouveau client', href: '/admin/clients/new' }}

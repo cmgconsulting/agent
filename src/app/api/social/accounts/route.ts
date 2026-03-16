@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
 /**
  * GET /api/social/accounts
  * List social accounts for the current client (tokens masked).

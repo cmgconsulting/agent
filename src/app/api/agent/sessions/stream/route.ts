@@ -1,5 +1,6 @@
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
 /**
  * GET /api/agent/sessions/stream?session_id=xxx
  * SSE endpoint for real-time agent session tracking.

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { isValidUUID, checkRateLimit, RATE_LIMITS } from '@/lib/security'
 
+export const dynamic = 'force-dynamic'
 /**
  * POST /api/social/campaigns/[campaignId]/launch
  * Launch a campaign (change status to active).

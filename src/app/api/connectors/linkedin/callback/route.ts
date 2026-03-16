@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { encryptCredentials } from '@/lib/vault'
 
+export const dynamic = 'force-dynamic'
 const LINKEDIN_CLIENT_ID = process.env.LINKEDIN_CLIENT_ID || ''
 const LINKEDIN_CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET || ''
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'

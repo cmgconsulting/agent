@@ -4,6 +4,7 @@ import { isValidUUID, checkRateLimit, RATE_LIMITS } from '@/lib/security'
 import { getPublisher } from '@/lib/social/publishers/factory'
 import type { SocialPlatform, SocialAccount } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 /**
  * POST /api/social/posts/[postId]/publish
  * Publish a draft post to its platform.

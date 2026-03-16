@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
 // GET — Récupérer les préférences du client connecté
 export async function GET(req: NextRequest) {
   const supabase = createServerSupabaseClient()

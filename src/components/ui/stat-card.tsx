@@ -1,10 +1,11 @@
 'use client'
 
 import { LucideIcon } from 'lucide-react'
+import { ReactNode } from 'react'
 import { HelpTooltip } from './help-tooltip'
 
 interface StatCardProps {
-  icon: LucideIcon
+  icon: LucideIcon | ReactNode
   label: string
   value: string | number
   helpText?: string
@@ -43,14 +44,26 @@ const colorMap = {
   },
 }
 
-export function StatCard({ icon: Icon, label, value, helpText, trend, color = 'brand' }: StatCardProps) {
+function isLucideIcon(icon: LucideIcon | ReactNode): icon is LucideIcon {
+  return typeof icon === 'function'
+}
+
+export function StatCard({ icon, label, value, helpText, trend, color = 'brand' }: StatCardProps) {
   const c = colorMap[color]
+
+  const renderIcon = () => {
+    if (isLucideIcon(icon)) {
+      const Icon = icon
+      return <Icon className={`w-5 h-5 ${c.icon}`} />
+    }
+    return icon
+  }
 
   return (
     <div className="card animate-slide-up">
       <div className="flex items-start justify-between">
         <div className={`w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center`}>
-          <Icon className={`w-5 h-5 ${c.icon}`} />
+          {renderIcon()}
         </div>
         {helpText && <HelpTooltip text={helpText} />}
       </div>

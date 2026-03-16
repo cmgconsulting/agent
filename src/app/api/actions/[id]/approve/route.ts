@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { notifyClient } from '@/lib/notifications'
 import { executeAction } from '@/lib/action-executor'
 
+export const dynamic = 'force-dynamic'
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }

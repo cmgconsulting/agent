@@ -1,6 +1,7 @@
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
 // ============================================
 // GET — List all team members for the authenticated user's client
 //

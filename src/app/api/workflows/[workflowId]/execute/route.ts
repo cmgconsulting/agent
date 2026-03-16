@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS, isValidUUID } from '@/lib/security'
 import { executeWorkflow } from '@/lib/workflows/engine'
 
+export const dynamic = 'force-dynamic'
 // ============================================
 // POST — Create execution record and fire-and-forget
 // Returns { execution_id } immediately with 202 status

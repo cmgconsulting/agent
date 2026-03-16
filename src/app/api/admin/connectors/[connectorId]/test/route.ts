@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { decryptCredentials } from '@/lib/vault'
 import type { ConnectorType } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 async function testGmailConnection(credentials: Record<string, string>): Promise<{ ok: boolean; message: string }> {
   try {
     const res = await fetch('https://www.googleapis.com/gmail/v1/users/me/profile', {

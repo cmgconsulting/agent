@@ -1,9 +1,10 @@
 'use client'
 
 import { LucideIcon } from 'lucide-react'
+import { ReactNode } from 'react'
 
 interface EmptyStateProps {
-  icon: LucideIcon
+  icon: LucideIcon | ReactNode
   title: string
   description: string
   actionLabel?: string
@@ -67,8 +68,12 @@ function Illustration({ type, className = '' }: { type: string; className?: stri
   return illustrations[type] || illustrations.rocket
 }
 
+function isLucideIcon(icon: LucideIcon | ReactNode): icon is LucideIcon {
+  return typeof icon === 'function'
+}
+
 export function EmptyState({
-  icon: Icon,
+  icon,
   title,
   description,
   actionLabel,
@@ -76,11 +81,19 @@ export function EmptyState({
   actionHref,
   illustration = 'rocket'
 }: EmptyStateProps) {
+  const renderIcon = () => {
+    if (isLucideIcon(icon)) {
+      const Icon = icon
+      return <Icon className="w-5 h-5 text-brand-400" />
+    }
+    return icon
+  }
+
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 animate-fade-in">
       <Illustration type={illustration} className="w-32 h-32 mb-6" />
       <div className="flex items-center gap-2 mb-2">
-        <Icon className="w-5 h-5 text-brand-400" />
+        {renderIcon()}
         <h3 className="text-lg font-bold text-ink-700">{title}</h3>
       </div>
       <p className="text-sm text-ink-300 text-center max-w-md mb-6">{description}</p>

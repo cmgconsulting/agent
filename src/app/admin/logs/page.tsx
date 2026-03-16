@@ -33,7 +33,7 @@ export default async function LogsPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        icon={FileText}
+        icon={<FileText className="w-5 h-5 text-brand-500" />}
         title="Logs d'activité"
         subtitle="Historique des opérations de tous les agents"
       />

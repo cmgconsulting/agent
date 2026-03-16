@@ -4,6 +4,7 @@ import { encryptCredentials } from '@/lib/vault'
 import { checkRateLimit, rateLimitResponse, sanitizeString, validateRequired } from '@/lib/security'
 import { safeDecryptCredentials, maskCredentials } from '@/lib/connectors/custom-connector-utils'
 
+export const dynamic = 'force-dynamic'
 // ============================================
 // GET — List custom connectors for client
 // ============================================

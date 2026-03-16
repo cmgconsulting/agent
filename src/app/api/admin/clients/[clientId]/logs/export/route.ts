@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { renderClientReportPdf } from '@/lib/pdf/report-templates'
 
+export const dynamic = 'force-dynamic'
 export async function GET(
   request: NextRequest,
   { params }: { params: { clientId: string } }

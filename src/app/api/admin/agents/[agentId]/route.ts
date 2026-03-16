@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
 // PATCH /api/admin/agents/[agentId] - Update agent config
 export async function PATCH(
   request: NextRequest,

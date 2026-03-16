@@ -106,26 +106,26 @@ export default async function ClientDashboard() {
       {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
-          icon={Activity}
+          icon={<Activity className="w-5 h-5 text-blue-500" />}
           label="Actions cette semaine"
           value={weeklyLogs.length}
           color="blue"
           helpText="Nombre total d'actions de vos agents ces 7 derniers jours"
         />
         <StatCard
-          icon={CheckCircle}
+          icon={<CheckCircle className="w-5 h-5 text-emerald-500" />}
           label="Réussies"
           value={weeklySuccess}
           color="green"
         />
         <StatCard
-          icon={XCircle}
+          icon={<XCircle className="w-5 h-5 text-red-500" />}
           label="Erreurs"
           value={weeklyErrors}
           color="red"
         />
         <StatCard
-          icon={Clock}
+          icon={<Clock className="w-5 h-5 text-orange-500" />}
           label="En attente de validation"
           value={pendingActions?.length || 0}
           color="orange"
@@ -274,7 +274,7 @@ export default async function ClientDashboard() {
           </div>
         ) : (
           <EmptyState
-            icon={Sparkles}
+            icon={<Sparkles className="w-5 h-5 text-brand-400" />}
             title="Pas encore d'activité"
             description="Vos agents commenceront bientôt à travailler pour vous !"
             illustration="rocket"

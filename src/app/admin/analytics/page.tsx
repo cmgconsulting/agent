@@ -157,7 +157,7 @@ export default async function AnalyticsPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        icon={BarChart3}
+        icon={<BarChart3 className="w-5 h-5 text-brand-500" />}
         title="Analytics"
         subtitle="Métriques clés de la plateforme CMG Agents"
       />

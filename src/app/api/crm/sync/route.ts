@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { CRMService } from '@/lib/crm/crm-service'
 import type { CRMType } from '@/lib/crm/types'
 
+export const dynamic = 'force-dynamic'
 // POST — Trigger a manual sync
 export async function POST(request: NextRequest) {
   const supabase = createServerSupabaseClient()

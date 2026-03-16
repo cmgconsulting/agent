@@ -5,6 +5,7 @@ import { exchangeCodeForTokens, fetchUserProfile } from '@/lib/social/oauth'
 import { encryptCredentials } from '@/lib/vault'
 import type { SocialPlatform } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 /**

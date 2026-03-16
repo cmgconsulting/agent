@@ -12,6 +12,8 @@ import type {
   WorkflowOnError,
 } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
+
 const VALID_STATUSES: WorkflowStatus[] = ['draft', 'active', 'paused']
 const VALID_TRIGGER_TYPES: WorkflowTriggerType[] = ['manual', 'schedule', 'event', 'webhook']
 const VALID_ON_ERROR: WorkflowOnError[] = ['stop', 'skip', 'retry']

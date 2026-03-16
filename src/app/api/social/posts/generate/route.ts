@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { checkRateLimit, RATE_LIMITS, sanitizeString } from '@/lib/security'
 import Anthropic from '@anthropic-ai/sdk'
 
+export const dynamic = 'force-dynamic'
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || '' })
 
 /**

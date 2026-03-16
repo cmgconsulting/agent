@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
 // ============================================
 // GET — Notifications for the authenticated user
 // Query params: unread_only? (boolean, default false), limit? (default 20)

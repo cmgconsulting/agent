@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
 // POST — Enregistrer un feedback d'insatisfaction
 export async function POST(req: NextRequest) {
   const supabase = createServerSupabaseClient()

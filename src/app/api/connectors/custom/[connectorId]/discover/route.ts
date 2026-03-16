@@ -2,6 +2,7 @@ import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supab
 import { NextResponse } from 'next/server'
 import { listMcpTools } from '@/lib/connectors/mcp-client'
 
+export const dynamic = 'force-dynamic'
 export async function POST(
   _request: Request,
   { params }: { params: { connectorId: string } }

@@ -4,6 +4,7 @@ import { encryptCredentials } from '@/lib/vault'
 import { sanitizeString } from '@/lib/security'
 import { safeDecryptCredentials, maskCredentials } from '@/lib/connectors/custom-connector-utils'
 
+export const dynamic = 'force-dynamic'
 async function getClientAndConnector(connectorId: string) {
   const supabase = createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()

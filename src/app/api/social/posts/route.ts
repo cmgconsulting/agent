@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { checkRateLimit, RATE_LIMITS, sanitizeString } from '@/lib/security'
 
+export const dynamic = 'force-dynamic'
 /**
  * GET /api/social/posts
  * List posts for the current client with optional filters.

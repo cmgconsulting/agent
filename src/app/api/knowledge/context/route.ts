@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/security'
 import { getKnowledgeContext } from '@/lib/knowledge/context'
 
+export const dynamic = 'force-dynamic'
 /**
  * POST /api/knowledge/context
  *

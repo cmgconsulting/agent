@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { CRMService } from '@/lib/crm/crm-service'
 import type { CRMType } from '@/lib/crm/types'
 
+export const dynamic = 'force-dynamic'
 // GET — List all CRM connections for current user
 export async function GET() {
   const supabase = createServerSupabaseClient()

@@ -21,7 +21,7 @@ export default async function ClientsListPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        icon={Users}
+        icon={<Users className="w-5 h-5 text-brand-500" />}
         title="Clients"
         subtitle={`${clients?.length || 0} clients enregistrés`}
         action={{ label: 'Nouveau client', href: '/admin/clients/new', icon: Plus }}

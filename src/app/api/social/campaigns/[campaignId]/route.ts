@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { isValidUUID, sanitizeString } from '@/lib/security'
 
+export const dynamic = 'force-dynamic'
 /**
  * GET /api/social/campaigns/[campaignId]
  */

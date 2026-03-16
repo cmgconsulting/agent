@@ -7,6 +7,8 @@ import {
   isValidUUID,
 } from '@/lib/security'
 
+export const dynamic = 'force-dynamic'
+
 // ============================================
 // POST — Share a conversation with team or specific users
 // Body: { shared_with_team?, shared_with_users?, note? }

@@ -6,7 +6,7 @@ import { PageHeader } from '@/components/ui/page-header'
 import { SectionHelp } from '@/components/ui/help-tooltip'
 import { CRMConnectorCard } from '@/components/crm/crm-connector-card'
 import { CRMConnectionModal } from '@/components/crm/crm-connection-modal'
-import { CRM_CONFIGS, type CRMType, type CRMConfig } from '@/lib/crm/types'
+import { CRM_CONFIGS, type CRMConfig } from '@/lib/crm/types'
 
 interface CRMConnection {
   id: string

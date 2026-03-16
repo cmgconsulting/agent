@@ -4,6 +4,7 @@ import { checkRateLimit, RATE_LIMITS, sanitizeString } from '@/lib/security'
 import { getPublisher } from '@/lib/social/publishers/factory'
 import type { SocialPlatform, SocialAccount } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 /**
  * POST /api/social/posts/multi-publish
  * Publish content across multiple platforms simultaneously.

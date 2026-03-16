@@ -8,6 +8,7 @@ import {
 } from '@/lib/security'
 import type { ConversationStatus } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 const VALID_STATUSES: ConversationStatus[] = ['active', 'archived']
 
 // ============================================

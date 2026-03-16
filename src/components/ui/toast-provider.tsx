@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useCallback, useRef } from 'react'
-import { X, CheckCircle, AlertTriangle, Info, Bell, Bot } from 'lucide-react'
+import { X, CheckCircle, AlertTriangle, Info, Bot } from 'lucide-react'
 import type { AgentType } from '@/types/database'
 import { AgentAvatar } from '@/components/agents/agent-avatars'
 

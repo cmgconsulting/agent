@@ -5,6 +5,7 @@ import type { AgentType } from '@/types/database'
 import { AGENTS } from '@/lib/agents-config'
 import { renderRoiReportPdf } from '@/lib/pdf/report-templates'
 
+export const dynamic = 'force-dynamic'
 interface AgentExportInfo {
   type: AgentType
   name: string

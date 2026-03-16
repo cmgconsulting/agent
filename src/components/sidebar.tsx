@@ -8,8 +8,8 @@ import type { UserRole } from '@/types/database'
 import { Logo } from '@/components/ui/logo'
 import { HelpTooltip } from '@/components/ui/help-tooltip'
 import {
-  LayoutDashboard, Users, Settings, LogOut, Bot, Plug, BarChart3,
-  Rocket, FileText, Activity, BookOpen, ClipboardList, Database,
+  LayoutDashboard, Users, Settings, LogOut, Bot, Plug,
+  Rocket, FileText, Activity, BookOpen, Database,
   TrendingUp, GitBranch, MessageSquare, Palette, CheckSquare,
   UsersRound, Share2, Coins, ChevronRight, HelpCircle, Brain,
   Menu, X, Link2

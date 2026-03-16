@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { encryptCredentials } from '@/lib/vault'
 
+export const dynamic = 'force-dynamic'
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_ANALYTICS_CLIENT_ID || ''
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_ANALYTICS_CLIENT_SECRET || ''
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'

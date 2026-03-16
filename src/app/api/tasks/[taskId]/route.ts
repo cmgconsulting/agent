@@ -8,6 +8,7 @@ import {
 } from '@/lib/security'
 import type { TaskStatus, TaskPriority } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 const VALID_STATUSES: TaskStatus[] = ['todo', 'in_progress', 'done', 'cancelled']
 const VALID_PRIORITIES: TaskPriority[] = ['low', 'medium', 'high', 'urgent']
 

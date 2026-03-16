@@ -4,6 +4,7 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/security'
 import { AGENTS } from '@/lib/agents-config'
 import type { AgentType } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 // Default hourly cost if no roi_config exists
 const DEFAULT_HOURLY_COST_EUROS = 45
 

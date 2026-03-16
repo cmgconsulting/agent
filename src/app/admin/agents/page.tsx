@@ -45,7 +45,7 @@ export default async function AdminAgentsPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        icon={Bot}
+        icon={<Bot className="w-5 h-5 text-brand-500" />}
         title="Gestion des Agents"
         subtitle="Configuration globale des 8 agents IA"
       />

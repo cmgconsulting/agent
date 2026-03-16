@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/security'
 import { renderLogReportPdf } from '@/lib/pdf/report-templates'
 
+export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   const supabase = createServerSupabaseClient()
   const format = request.nextUrl.searchParams.get('format') || 'csv'

@@ -3,6 +3,7 @@ import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supab
 import { checkRateLimit, RATE_LIMITS, sanitizeString } from '@/lib/security'
 import type { ClientBrandingConfig } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 // ============================================
 // TYPES
 // ============================================

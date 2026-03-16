@@ -59,7 +59,7 @@ export default async function ClientAgentsPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        icon={Bot}
+        icon={<Bot className="w-5 h-5 text-brand-500" />}
         title="Mes Agents"
         subtitle="Vos assistants IA travaillent pour vous au quotidien"
       />

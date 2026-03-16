@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { isValidUUID } from '@/lib/security'
 
+export const dynamic = 'force-dynamic'
 /**
  * GET /api/social/accounts/[accountId]
  * Get details of a social account (tokens masked).

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/security'
 
+export const dynamic = 'force-dynamic'
 // ============================================
 // CONSTANTS
 // ============================================

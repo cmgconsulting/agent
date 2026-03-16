@@ -2,6 +2,7 @@ import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supab
 import { NextResponse } from 'next/server'
 import type { AgentType, PlanType } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 export async function POST(request: Request) {
   try {
     // Verify the caller is admin

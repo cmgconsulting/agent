@@ -4,6 +4,7 @@ import { runAgent, type AgentContext } from '@/lib/agent-framework'
 import type { AgentType } from '@/types/database'
 import { checkRateLimit, RATE_LIMITS, sanitizeString, isValidUUID } from '@/lib/security'
 
+export const dynamic = 'force-dynamic'
 const VALID_AGENT_TYPES: AgentType[] = ['eva', 'ludo', 'marc', 'leo', 'hugo', 'sofia', 'felix', 'iris']
 
 export async function POST(request: NextRequest) {

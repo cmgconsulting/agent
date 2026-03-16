@@ -4,6 +4,7 @@ import { checkRateLimit, RATE_LIMITS, sanitizeString, isValidUUID } from '@/lib/
 import { calculateNextRun } from '@/lib/schedule-calculator'
 import type { ScheduleType, ScheduleConfig } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 /**
  * GET /api/scheduled-tasks/[taskId]
  * Get a specific scheduled task with its recent runs.
