@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" fill="none">
+  <!-- Top-left petal -->
+  <g transform="translate(18, 8)">
+    <rect x="0" y="0" width="38" height="42" rx="12" fill="#FEC000"/>
+    <line x1="8" y1="4" x2="8" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="13" y1="4" x2="13" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="18" y1="4" x2="18" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="23" y1="4" x2="23" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="28" y1="4" x2="28" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+  </g>
+  <!-- Top-right petal -->
+  <g transform="translate(60, 8)">
+    <rect x="0" y="0" width="38" height="42" rx="12" fill="#FEC000"/>
+    <line x1="10" y1="4" x2="10" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="15" y1="4" x2="15" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="20" y1="4" x2="20" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="25" y1="4" x2="25" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="30" y1="4" x2="30" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+  </g>
+  <!-- Bottom-left petal -->
+  <g transform="translate(18, 54)">
+    <rect x="0" y="0" width="38" height="42" rx="12" fill="#FEC000"/>
+    <line x1="8" y1="4" x2="8" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="13" y1="4" x2="13" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="18" y1="4" x2="18" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="23" y1="4" x2="23" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="28" y1="4" x2="28" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+  </g>
+  <!-- Bottom-right petal -->
+  <g transform="translate(60, 54)">
+    <rect x="0" y="0" width="38" height="42" rx="12" fill="#FEC000"/>
+    <line x1="10" y1="4" x2="10" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="15" y1="4" x2="15" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="20" y1="4" x2="20" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="25" y1="4" x2="25" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+    <line x1="30" y1="4" x2="30" y2="38" stroke="#E5AC00" stroke-width="1.2"/>
+  </g>
+  <!-- Text CMG -->
+  <text x="115" y="62" font-family="'Bai Jamjuree', sans-serif" font-weight="700" font-size="40" fill="#1A1A1A">CMG</text>
+  <!-- Text AGENT -->
+  <text x="115" y="95" font-family="'Bai Jamjuree', sans-serif" font-weight="600" font-size="28" letter-spacing="2" fill="#1A1A1A">AGENT</text>
+</svg>

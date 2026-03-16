@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft, Bot, Plug, Calendar, Building2, FileText, Download, Palette } from 'lucide-react'
 import Link from 'next/link'
 import { AGENTS, PLAN_LABELS } from '@/lib/agents-config'
-import type { PlanType } from '@/types/database'
+import type { PlanType, AgentType } from '@/types/database'
+import { AgentAvatar } from '@/components/agents/agent-avatars'
 
 export default async function ClientDetailPage({ params }: { params: { id: string } }) {
   const supabase = createServerSupabaseClient()
@@ -41,22 +42,22 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
     .limit(10)
 
   return (
-    <div>
-      <Link href="/admin" className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6">
+    <div className="animate-fade-in">
+      <Link href="/admin" className="flex items-center gap-2 text-ink-400 hover:text-ink-600 mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" />
         Retour au dashboard
       </Link>
 
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <div className="card mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center">
-              <Building2 className="w-7 h-7 text-blue-600" />
+            <div className="w-14 h-14 rounded-xl bg-brand-50 flex items-center justify-center">
+              <Building2 className="w-7 h-7 text-brand-500" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{client.company_name}</h1>
-              <p className="text-gray-500">{profile?.email} &middot; {profile?.full_name}</p>
+              <h1 className="text-2xl font-bold text-ink-700">{client.company_name}</h1>
+              <p className="text-ink-400">{profile?.email} &middot; {profile?.full_name}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -74,42 +75,42 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
             </Link>
             <a
               href={`/api/admin/clients/${params.id}/logs/export`}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
+              className="btn-secondary text-sm py-1.5"
             >
               <Download className="w-4 h-4" /> Export CSV
             </a>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              client.plan === 'full' ? 'bg-purple-100 text-purple-700' :
+              client.plan === 'enterprise' ? 'bg-purple-100 text-purple-700' :
               client.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
-              'bg-gray-100 text-gray-700'
+              'bg-emerald-100 text-emerald-700'
             }`}>
               {PLAN_LABELS[client.plan as PlanType]}
             </span>
             <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm ${
-              client.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+              client.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
             }`}>
-              <span className={`w-2 h-2 rounded-full ${client.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
+              <span className={`w-2 h-2 rounded-full ${client.is_active ? 'bg-emerald-500' : 'bg-red-500'}`} />
               {client.is_active ? 'Actif' : 'Suspendu'}
             </span>
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-6 mt-6 pt-6 border-t border-gray-100">
+        <div className="grid grid-cols-4 gap-6 mt-6 pt-6 border-t border-surface-100">
           <div>
-            <p className="text-sm text-gray-500">Telephone</p>
-            <p className="font-medium text-gray-900">{client.phone || '—'}</p>
+            <p className="text-sm text-ink-400">Téléphone</p>
+            <p className="font-medium text-ink-700">{client.phone || '—'}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">SIRET</p>
-            <p className="font-medium text-gray-900">{client.siret || '—'}</p>
+            <p className="text-sm text-ink-400">SIRET</p>
+            <p className="font-medium text-ink-700">{client.siret || '—'}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Adresse</p>
-            <p className="font-medium text-gray-900">{client.address || '—'}</p>
+            <p className="text-sm text-ink-400">Adresse</p>
+            <p className="font-medium text-ink-700">{client.address || '—'}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Cree le</p>
-            <p className="font-medium text-gray-900">
+            <p className="text-sm text-ink-400">Créé le</p>
+            <p className="font-medium text-ink-700">
               {new Date(client.created_at).toLocaleDateString('fr-FR')}
             </p>
           </div>
@@ -118,25 +119,25 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Agents */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="card">
           <div className="flex items-center gap-2 mb-4">
-            <Bot className="w-5 h-5 text-gray-400" />
-            <h2 className="text-lg font-semibold text-gray-900">Agents</h2>
+            <Bot className="w-5 h-5 text-ink-400" />
+            <h2 className="section-title">Agents</h2>
           </div>
           <div className="space-y-3">
             {agents?.map((agent) => {
               const config = AGENTS.find(a => a.type === agent.type)
               return (
-                <div key={agent.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                <div key={agent.id} className="flex items-center justify-between p-3 rounded-xl bg-surface-50">
                   <div className="flex items-center gap-3">
-                    <span className="text-xl">{config?.icon}</span>
+                    <AgentAvatar type={agent.type as AgentType} size="sm" />
                     <div>
-                      <p className="font-medium text-gray-900">{agent.name}</p>
-                      <p className="text-xs text-gray-500">{config?.role}</p>
+                      <p className="font-medium text-ink-700">{agent.name}</p>
+                      <p className="text-xs text-ink-400">{config?.role}</p>
                     </div>
                   </div>
                   <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                    agent.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                    agent.active ? 'bg-emerald-100 text-emerald-700' : 'bg-surface-100 text-ink-400'
                   }`}>
                     {agent.active ? 'Actif' : 'Inactif'}
                   </span>
@@ -147,31 +148,31 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
         </div>
 
         {/* Connectors */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="card">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Plug className="w-5 h-5 text-gray-400" />
-              <h2 className="text-lg font-semibold text-gray-900">Connecteurs</h2>
+              <Plug className="w-5 h-5 text-ink-400" />
+              <h2 className="section-title">Connecteurs</h2>
             </div>
             <Link
               href={`/admin/clients/${params.id}/connectors`}
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="text-sm text-brand-500 hover:text-brand-600 font-medium"
             >
-              Gerer &rarr;
+              Gérer &rarr;
             </Link>
           </div>
           {connectors && connectors.length > 0 ? (
             <div className="space-y-3">
               {connectors.map((conn) => (
-                <div key={conn.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                <div key={conn.id} className="flex items-center justify-between p-3 rounded-xl bg-surface-50">
                   <div>
-                    <p className="font-medium text-gray-900 capitalize">{conn.type.replace('_', ' ')}</p>
-                    <p className="text-xs text-gray-500">{conn.label || conn.type}</p>
+                    <p className="font-medium text-ink-700 capitalize">{conn.type.replace('_', ' ')}</p>
+                    <p className="text-xs text-ink-400">{conn.label || conn.type}</p>
                   </div>
                   <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                    conn.status === 'active' ? 'bg-green-100 text-green-700' :
+                    conn.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
                     conn.status === 'error' ? 'bg-red-100 text-red-700' :
-                    'bg-gray-100 text-gray-500'
+                    'bg-surface-100 text-ink-400'
                   }`}>
                     {conn.status}
                   </span>
@@ -179,35 +180,35 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
               ))}
             </div>
           ) : (
-            <p className="text-gray-400 text-sm py-4 text-center">Aucun connecteur configure</p>
+            <p className="text-ink-400 text-sm py-4 text-center">Aucun connecteur configuré</p>
           )}
         </div>
 
         {/* Recent logs */}
-        <div className="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
+        <div className="card lg:col-span-2">
           <div className="flex items-center gap-2 mb-4">
-            <Calendar className="w-5 h-5 text-gray-400" />
-            <h2 className="text-lg font-semibold text-gray-900">Activite recente</h2>
+            <Calendar className="w-5 h-5 text-ink-400" />
+            <h2 className="section-title">Activité récente</h2>
           </div>
           {recentLogs && recentLogs.length > 0 ? (
             <div className="space-y-2">
               {recentLogs.map((log) => (
-                <div key={log.id} className="flex items-center gap-4 p-3 rounded-lg bg-gray-50">
+                <div key={log.id} className="flex items-center gap-4 p-3 rounded-xl bg-surface-50">
                   <span className={`w-2 h-2 rounded-full ${
-                    log.status === 'success' ? 'bg-green-500' :
+                    log.status === 'success' ? 'bg-emerald-500' :
                     log.status === 'error' ? 'bg-red-500' :
-                    log.status === 'warning' ? 'bg-yellow-500' :
-                    'bg-blue-500'
+                    log.status === 'warning' ? 'bg-amber-500' :
+                    'bg-brand-400'
                   }`} />
-                  <p className="flex-1 text-sm text-gray-700">{log.action}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="flex-1 text-sm text-ink-600">{log.action}</p>
+                  <p className="text-xs text-ink-400">
                     {new Date(log.created_at).toLocaleString('fr-FR')}
                   </p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-gray-400 text-sm py-4 text-center">Aucune activite enregistree</p>
+            <p className="text-ink-400 text-sm py-4 text-center">Aucune activité enregistrée</p>
           )}
         </div>
       </div>

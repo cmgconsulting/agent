@@ -9,9 +9,9 @@ import Link from 'next/link'
 
 const DEFAULT_BRANDING: ClientBranding = {
   logo_url: null,
-  primary_color: '#2563EB',   // blue-600
-  secondary_color: '#1E40AF', // blue-800
-  accent_color: '#10B981',    // emerald-500
+  primary_color: '#2563EB',
+  secondary_color: '#1E40AF',
+  accent_color: '#10B981',
 }
 
 export default function BrandingPage() {
@@ -58,30 +58,23 @@ export default function BrandingPage() {
   }
 
   return (
-    <div>
-      <Link href={`/admin/clients/${clientId}`} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6">
+    <div className="animate-fade-in">
+      <Link href={`/admin/clients/${clientId}`} className="flex items-center gap-2 text-ink-400 hover:text-ink-600 mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Retour au client
       </Link>
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Personnalisation</h1>
-          <p className="text-gray-500">{clientName} — White-label</p>
+          <h1 className="text-2xl font-bold text-ink-700">Personnalisation</h1>
+          <p className="text-ink-400">{clientName} — White-label</p>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={resetDefaults}
-            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition"
-          >
-            <RotateCcw className="w-4 h-4" /> Reinitialiser
+          <button onClick={resetDefaults} className="btn-secondary">
+            <RotateCcw className="w-4 h-4" /> Réinitialiser
           </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50"
-          >
+          <button onClick={handleSave} disabled={saving} className="btn-brand">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-            {saved ? 'Sauvegarde !' : 'Sauvegarder'}
+            {saved ? 'Sauvegardé !' : 'Sauvegarder'}
           </button>
         </div>
       </div>
@@ -90,48 +83,48 @@ export default function BrandingPage() {
         {/* Settings */}
         <div className="space-y-6">
           {/* Logo */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <div className="card">
+            <h3 className="text-sm font-semibold text-ink-400 uppercase tracking-wider mb-4 flex items-center gap-2">
               <Palette className="w-4 h-4" /> Logo
             </h3>
             <div className="space-y-3">
-              <label className="block text-sm font-medium text-gray-700">URL du logo</label>
+              <label className="block text-sm font-medium text-ink-600">URL du logo</label>
               <input
                 type="url"
                 value={branding.logo_url || ''}
                 onChange={e => setBranding(prev => ({ ...prev, logo_url: e.target.value || null }))}
                 placeholder="https://example.com/logo.png"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
               />
-              <p className="text-xs text-gray-400">Format recommande : PNG ou SVG, 200x60px min</p>
+              <p className="text-xs text-ink-300">Format recommandé : PNG ou SVG, 200x60px min</p>
             </div>
           </div>
 
           {/* Colors */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Couleurs</h3>
+          <div className="card">
+            <h3 className="text-sm font-semibold text-ink-400 uppercase tracking-wider mb-4">Couleurs</h3>
             <div className="space-y-4">
               {[
-                { key: 'primary_color' as const, label: 'Couleur principale', desc: 'Boutons, liens, elements actifs' },
-                { key: 'secondary_color' as const, label: 'Couleur secondaire', desc: 'Arriere-plans, bordures' },
-                { key: 'accent_color' as const, label: 'Couleur accent', desc: 'Succes, badges, highlights' },
+                { key: 'primary_color' as const, label: 'Couleur principale', desc: 'Boutons, liens, éléments actifs' },
+                { key: 'secondary_color' as const, label: 'Couleur secondaire', desc: 'Arrière-plans, bordures' },
+                { key: 'accent_color' as const, label: 'Couleur accent', desc: 'Succès, badges, highlights' },
               ].map(({ key, label, desc }) => (
                 <div key={key} className="flex items-center gap-4">
                   <input
                     type="color"
                     value={branding[key]}
                     onChange={e => setBranding(prev => ({ ...prev, [key]: e.target.value }))}
-                    className="w-12 h-12 rounded-lg cursor-pointer border border-gray-200"
+                    className="w-12 h-12 rounded-lg cursor-pointer border border-surface-200"
                   />
                   <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700">{label}</label>
-                    <p className="text-xs text-gray-400">{desc}</p>
+                    <label className="block text-sm font-medium text-ink-600">{label}</label>
+                    <p className="text-xs text-ink-300">{desc}</p>
                   </div>
                   <input
                     type="text"
                     value={branding[key]}
                     onChange={e => setBranding(prev => ({ ...prev, [key]: e.target.value }))}
-                    className="w-28 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono text-center"
+                    className="w-28 border border-surface-200 rounded-lg px-3 py-2 text-sm font-mono text-center focus:ring-2 focus:ring-brand-400 focus:border-transparent"
                     maxLength={7}
                   />
                 </div>
@@ -141,11 +134,10 @@ export default function BrandingPage() {
         </div>
 
         {/* Preview */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Apercu</h3>
+        <div className="card">
+          <h3 className="text-sm font-semibold text-ink-400 uppercase tracking-wider mb-4">Apercu</h3>
 
-          {/* Mock dashboard preview */}
-          <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <div className="border border-surface-200 rounded-xl overflow-hidden">
             {/* Header */}
             <div className="px-4 py-3 flex items-center gap-3" style={{ backgroundColor: branding.primary_color }}>
               {branding.logo_url ? (
@@ -161,7 +153,7 @@ export default function BrandingPage() {
 
             {/* Mock sidebar + content */}
             <div className="flex min-h-[300px]">
-              <div className="w-36 border-r border-gray-100 p-3 space-y-1">
+              <div className="w-36 border-r border-surface-100 p-3 space-y-1">
                 {['Dashboard', 'Agents', 'SAV', 'Emails'].map((item, i) => (
                   <div
                     key={item}
@@ -173,15 +165,15 @@ export default function BrandingPage() {
                 ))}
               </div>
               <div className="flex-1 p-4 space-y-3">
-                <h4 className="text-sm font-bold text-gray-900">Bienvenue, {clientName || 'Client'}</h4>
+                <h4 className="text-sm font-bold text-ink-700">Bienvenue, {clientName || 'Client'}</h4>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="rounded-lg p-3 text-xs" style={{ backgroundColor: `${branding.primary_color}10` }}>
                     <p className="font-bold" style={{ color: branding.primary_color }}>5</p>
-                    <p className="text-gray-500">Agents actifs</p>
+                    <p className="text-ink-400">Agents actifs</p>
                   </div>
                   <div className="rounded-lg p-3 text-xs" style={{ backgroundColor: `${branding.accent_color}10` }}>
                     <p className="font-bold" style={{ color: branding.accent_color }}>12</p>
-                    <p className="text-gray-500">Actions OK</p>
+                    <p className="text-ink-400">Actions OK</p>
                   </div>
                 </div>
                 <button
@@ -199,8 +191,8 @@ export default function BrandingPage() {
               </div>
             </div>
           </div>
-          <p className="text-xs text-gray-400 mt-3 text-center">
-            Apercu du dashboard client avec les couleurs personnalisees
+          <p className="text-xs text-ink-300 mt-3 text-center">
+            Apercu du dashboard client avec les couleurs personnalisées
           </p>
         </div>
       </div>

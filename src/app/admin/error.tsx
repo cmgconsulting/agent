@@ -10,23 +10,23 @@ export default function AdminError({
   reset: () => void
 }) {
   return (
-    <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="flex items-center justify-center min-h-[60vh] animate-fade-in">
       <div className="text-center max-w-md">
-        <div className="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
-          <AlertTriangle className="w-8 h-8 text-red-600" />
+        <div className="mx-auto w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-4">
+          <AlertTriangle className="w-8 h-8 text-red-500" />
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Une erreur est survenue</h2>
-        <p className="text-gray-500 mb-6 text-sm">
-          {error.message || 'Quelque chose s\'est mal passe. Veuillez reessayer.'}
+        <h2 className="text-xl font-bold text-ink-700 mb-2">Une erreur est survenue</h2>
+        <p className="text-ink-400 mb-6 text-sm">
+          {error.message || 'Quelque chose s\'est mal passé. Veuillez réessayer.'}
         </p>
         {error.digest && (
-          <p className="text-xs text-gray-400 mb-4 font-mono">Code: {error.digest}</p>
+          <p className="text-xs text-ink-300 mb-4 font-mono">Code: {error.digest}</p>
         )}
         <button
           onClick={reset}
-          className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition"
+          className="btn-brand inline-flex items-center gap-2"
         >
-          <RotateCcw className="w-4 h-4" /> Reessayer
+          <RotateCcw className="w-4 h-4" /> Réessayer
         </button>
       </div>
     </div>

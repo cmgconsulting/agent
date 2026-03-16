@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Sidebar } from '@/components/sidebar'
+import { LayoutProviders } from '@/components/layout-providers'
 
 export default async function ClientLayout({
   children,
@@ -22,11 +23,15 @@ export default async function ClientLayout({
   if (profile.role === 'admin') redirect('/admin')
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar role="client" userName={profile.full_name || profile.email} />
-      <main className="flex-1 bg-gray-50 p-8">
-        {children}
-      </main>
-    </div>
+    <LayoutProviders>
+      <div className="flex min-h-screen bg-surface-50">
+        <Sidebar role="client" userName={profile.full_name || profile.email} />
+        <main className="flex-1 p-4 lg:p-8 overflow-y-auto min-w-0">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
+        </main>
+      </div>
+    </LayoutProviders>
   )
 }

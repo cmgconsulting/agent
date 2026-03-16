@@ -1,11 +1,21 @@
+import { Settings } from 'lucide-react'
+import { PageHeader } from '@/components/ui/page-header'
+import { EmptyState } from '@/components/ui/empty-state'
+
 export default function AdminSettingsPage() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Parametres</h1>
-      <p className="text-gray-500">Configuration de la plateforme — Sprint 7</p>
-      <div className="bg-white rounded-xl shadow-sm p-12 mt-6 text-center text-gray-400">
-        Cette section sera disponible au Sprint 7.
-      </div>
+    <div className="animate-fade-in">
+      <PageHeader
+        icon={Settings}
+        title="Paramètres"
+        subtitle="Configuration de la plateforme"
+      />
+      <EmptyState
+        icon={Settings}
+        title="Bientot disponible"
+        description="La configuration avancée de la plateforme sera disponible prochainement."
+        illustration="rocket"
+      />
     </div>
   )
 }

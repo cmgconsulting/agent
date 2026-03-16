@@ -59,6 +59,16 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
 
+    // Verify admin role
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    if (profile?.role !== 'admin') {
+      return NextResponse.json({ error: 'Non autorise' }, { status: 403 })
+    }
+
     const url = new URL(request.url)
     const limit = parseInt(url.searchParams.get('limit') || '50')
 

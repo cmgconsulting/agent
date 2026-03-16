@@ -4,6 +4,9 @@ import { AGENTS, PLAN_LABELS } from '@/lib/agents-config'
 import type { PlanType } from '@/types/database'
 import Link from 'next/link'
 import { Bot, Users, Zap } from 'lucide-react'
+import { AgentAvatar } from '@/components/agents/agent-avatars'
+import type { AgentType } from '@/types/database'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function AdminAgentsPage() {
   const supabase = createServerSupabaseClient()
@@ -40,24 +43,23 @@ export default async function AdminAgentsPage() {
   })
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestion des Agents</h1>
-          <p className="text-gray-500">Configuration globale des 8 agents IA</p>
-        </div>
-      </div>
+    <div className="animate-fade-in">
+      <PageHeader
+        icon={Bot}
+        title="Gestion des Agents"
+        subtitle="Configuration globale des 8 agents IA"
+      />
 
       {/* Agent cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {agentStats.map(agent => (
-          <div key={agent.type} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div key={agent.type} className="card">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <span className="text-3xl">{agent.icon}</span>
+                <AgentAvatar type={agent.type as AgentType} size="sm" />
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">{agent.name}</h3>
-                  <p className="text-sm text-gray-500">{agent.role}</p>
+                  <h3 className="text-lg font-bold text-ink-700">{agent.name}</h3>
+                  <p className="text-sm text-ink-400">{agent.role}</p>
                 </div>
               </div>
               <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
@@ -65,28 +67,28 @@ export default async function AdminAgentsPage() {
                   ? 'bg-blue-100 text-blue-700'
                   : 'bg-purple-100 text-purple-700'
               }`}>
-                {agent.category === 'communication' ? 'Communication' : 'Strategie'}
+                {agent.category === 'communication' ? 'Communication' : 'Stratégie'}
               </span>
             </div>
 
-            <p className="text-sm text-gray-600 mb-4">{agent.description}</p>
+            <p className="text-sm text-ink-500 mb-4">{agent.description}</p>
 
-            <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center gap-4 pt-4 border-t border-surface-100">
               <div className="flex items-center gap-1.5 text-sm">
-                <Users className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-600">
-                  <span className="font-semibold text-gray-900">{agent.totalActive}</span>/{agent.totalClients} clients actifs
+                <Users className="w-4 h-4 text-ink-300" />
+                <span className="text-ink-500">
+                  <span className="font-semibold text-ink-700">{agent.totalActive}</span>/{agent.totalClients} clients actifs
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-sm">
-                <Zap className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-600">{agent.connectors.length} connecteurs</span>
+                <Zap className="w-4 h-4 text-ink-300" />
+                <span className="text-ink-500">{agent.connectors.length} connecteurs</span>
               </div>
             </div>
 
             <div className="mt-3 flex flex-wrap gap-1.5">
               {agent.connectors.map(c => (
-                <span key={c} className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">{c}</span>
+                <span key={c} className="px-2 py-0.5 bg-surface-100 text-ink-400 rounded-lg text-xs">{c}</span>
               ))}
             </div>
           </div>
@@ -94,36 +96,36 @@ export default async function AdminAgentsPage() {
       </div>
 
       {/* Per-client agent overview */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="card">
         <div className="flex items-center gap-2 mb-4">
-          <Bot className="w-5 h-5 text-gray-400" />
-          <h2 className="text-lg font-semibold text-gray-900">Agents par client</h2>
+          <Bot className="w-5 h-5 text-ink-400" />
+          <h2 className="section-title mb-0">Agents par client</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left py-3 px-2 font-medium text-gray-500">Client</th>
-                <th className="text-left py-3 px-2 font-medium text-gray-500">Plan</th>
+              <tr className="border-b border-surface-200">
+                <th className="text-left py-3 px-2 font-medium text-ink-400">Client</th>
+                <th className="text-left py-3 px-2 font-medium text-ink-400">Plan</th>
                 {AGENTS.map(a => (
-                  <th key={a.type} className="text-center py-3 px-1 font-medium text-gray-500" title={a.name}>
-                    {a.icon}
+                  <th key={a.type} className="text-center py-3 px-1 font-medium text-ink-400" title={a.name}>
+                    <AgentAvatar type={a.type as AgentType} size="sm" />
                   </th>
                 ))}
-                <th className="text-right py-3 px-2 font-medium text-gray-500">Actions</th>
+                <th className="text-right py-3 px-2 font-medium text-ink-400">Actions</th>
               </tr>
             </thead>
             <tbody>
               {(clients || []).map(client => {
                 const agents = (client as Record<string, unknown>).agents as Array<Record<string, unknown>> | undefined
                 return (
-                  <tr key={client.id} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="py-3 px-2 font-medium text-gray-900">{client.company_name}</td>
+                  <tr key={client.id} className="border-b border-surface-50 hover:bg-surface-50 transition-colors">
+                    <td className="py-3 px-2 font-medium text-ink-700">{client.company_name}</td>
                     <td className="py-3 px-2">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        client.plan === 'full' ? 'bg-purple-100 text-purple-700' :
+                        client.plan === 'enterprise' ? 'bg-purple-100 text-purple-700' :
                         client.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
-                        'bg-gray-100 text-gray-700'
+                        'bg-emerald-100 text-emerald-700'
                       }`}>
                         {PLAN_LABELS[client.plan as PlanType]}
                       </span>
@@ -133,7 +135,7 @@ export default async function AdminAgentsPage() {
                       return (
                         <td key={config.type} className="text-center py-3 px-1">
                           <span className={`inline-block w-3 h-3 rounded-full ${
-                            agent?.active ? 'bg-green-500' : 'bg-gray-200'
+                            agent?.active ? 'bg-emerald-500' : 'bg-surface-200'
                           }`} title={`${config.name}: ${agent?.active ? 'Actif' : 'Inactif'}`} />
                         </td>
                       )
@@ -141,7 +143,7 @@ export default async function AdminAgentsPage() {
                     <td className="py-3 px-2 text-right">
                       <Link
                         href={`/admin/clients/${client.id}`}
-                        className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                        className="text-brand-500 hover:text-brand-600 text-xs font-medium transition-colors"
                       >
                         Voir
                       </Link>

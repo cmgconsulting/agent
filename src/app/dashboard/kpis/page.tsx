@@ -1,11 +1,21 @@
+import { BarChart3 } from 'lucide-react'
+import { PageHeader } from '@/components/ui/page-header'
+import { EmptyState } from '@/components/ui/empty-state'
+
 export default function ClientKPIsPage() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">KPIs</h1>
-      <p className="text-gray-500">Vos indicateurs de performance — Sprint 6</p>
-      <div className="bg-white rounded-xl shadow-sm p-12 mt-6 text-center text-gray-400">
-        Cette section sera disponible au Sprint 6.
-      </div>
+    <div className="animate-fade-in">
+      <PageHeader
+        icon={BarChart3}
+        title="KPIs"
+        subtitle="Vos indicateurs de performance au quotidien"
+      />
+      <EmptyState
+        icon={BarChart3}
+        title="Bientot disponible"
+        description="Cette section sera disponible prochainement avec vos indicateurs de performance personnalises."
+        illustration="chart"
+      />
     </div>
   )
 }

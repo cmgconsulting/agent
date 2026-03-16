@@ -4,6 +4,8 @@ import { getAgentConfig } from '@/lib/agents-config'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { AgentDetailClient } from './agent-detail-client'
+import { AgentAvatar } from '@/components/agents/agent-avatars'
+import type { AgentType } from '@/types/database'
 
 export default async function AgentDetailPage({ params }: { params: { agentId: string } }) {
   const supabase = createServerSupabaseClient()
@@ -46,24 +48,24 @@ export default async function AgentDetailPage({ params }: { params: { agentId: s
     .order('created_at', { ascending: false })
 
   return (
-    <div>
-      <Link href="/dashboard/agents" className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6">
+    <div className="animate-fade-in">
+      <Link href="/dashboard/agents" className="flex items-center gap-2 text-ink-400 hover:text-ink-600 mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" />
         Retour aux agents
       </Link>
 
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <div className="card mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="text-4xl">{config.icon}</span>
+            <AgentAvatar type={agent.type as AgentType} size="md" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{agent.name}</h1>
-              <p className="text-gray-500">{config.role} · {config.description}</p>
+              <h1 className="text-2xl font-bold text-ink-700">{agent.name}</h1>
+              <p className="text-ink-400">{config.role} · {config.description}</p>
             </div>
           </div>
           <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-            agent.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+            agent.active ? 'badge-success' : 'bg-surface-100 text-ink-400'
           }`}>
             {agent.active ? 'Actif' : 'Inactif'}
           </span>

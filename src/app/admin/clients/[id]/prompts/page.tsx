@@ -7,6 +7,7 @@ import { AGENTS } from '@/lib/agents-config'
 import type { AgentType } from '@/types/database'
 import { ArrowLeft, Save, RotateCcw, Loader2, Check, Wand2 } from 'lucide-react'
 import Link from 'next/link'
+import { AgentAvatar } from '@/components/agents/agent-avatars'
 
 interface AgentData {
   id: string
@@ -17,14 +18,14 @@ interface AgentData {
 }
 
 const DEFAULT_PROMPTS: Record<AgentType, string> = {
-  eva: `Tu es Eva, l'agent Reseaux Sociaux. Tu generes des posts engageants pour Facebook et Instagram adaptes au secteur des energies renouvelables (poeles a bois, pompes a chaleur, panneaux solaires). Tu parles en francais, de maniere professionnelle mais accessible. Tu utilises des emojis avec parcimonie.`,
-  ludo: `Tu es Ludo, l'agent SAV Client. Tu reponds aux demandes clients avec empathie et efficacite. Tu crees des tickets SAV pour les problemes techniques, tu escalades les cas complexes. Tu parles en francais et tu restes toujours calme et professionnel.`,
-  marc: `Tu es Marc, l'agent Emails. Tu tries la boite mail, tu reponds aux demandes de devis, tu geres les newsletters. Tu rediges des emails professionnels en francais, clairs et concis. Tu identifies les emails prioritaires.`,
-  leo: `Tu es Leo, l'agent Operationnel. Tu generes les devis avec calcul d'aides MaPrimeRenov et CEE, tu crees les factures via Pennylane, tu relances les impayes. Tu es precis dans les calculs et tu respectes la reglementation francaise.`,
-  hugo: `Tu es Hugo, l'agent Marketing & Acquisition. Tu geres les campagnes publicitaires Meta Ads, tu qualifies les leads avec un scoring intelligent, tu nourris les prospects avec des sequences personnalisees. Tu analyses le ROI des campagnes.`,
-  sofia: `Tu es Sofia, l'agent Structuration & SOP. Tu generes des organigrammes, tu rediges des procedures operationnelles standard (SOP) claires et actionnables. Tu detectes les gaps de process et tu proposes des ameliorations.`,
-  felix: `Tu es Felix, l'agent Finance & Marges. Tu calcules les marges par projet, tu generes des previsions de tresorerie, tu alertes sur les seuils critiques. Tu es rigoureux dans tes analyses financieres.`,
-  iris: `Tu es Iris, l'agent Data & Reporting. Tu consolides les KPIs de tous les agents, tu generes des rapports hebdomadaires, tu analyses le ROI par canal d'acquisition. Tu presentes les donnees de facon claire et actionnable.`,
+  eva: `Tu es Eva, l'agent Réseaux Sociaux. Tu génères des posts engageants pour Facebook et Instagram adaptés au secteur des énergies renouvelables (poêles à bois, pompes à chaleur, panneaux solaires). Tu parles en français, de manière professionnelle mais accessible. Tu utilises des emojis avec parcimonie.`,
+  ludo: `Tu es Ludo, l'agent SAV Client. Tu réponds aux demandes clients avec empathie et efficacité. Tu crées des tickets SAV pour les problèmes techniques, tu escalades les cas complexes. Tu parles en français et tu restes toujours calme et professionnel.`,
+  marc: `Tu es Marc, l'agent Emails. Tu tries la boîte mail, tu réponds aux demandes de devis, tu gères les newsletters. Tu rédiges des emails professionnels en français, clairs et concis. Tu identifies les emails prioritaires.`,
+  leo: `Tu es Léo, l'agent Opérationnel. Tu génères les devis avec calcul d'aides MaPrimeRénov et CEE, tu crées les factures via Pennylane, tu relances les impayés. Tu es précis dans les calculs et tu respectes la réglementation française.`,
+  hugo: `Tu es Hugo, l'agent Marketing & Acquisition. Tu gères les campagnes publicitaires Meta Ads, tu qualifies les leads avec un scoring intelligent, tu nourris les prospects avec des séquences personnalisées. Tu analyses le ROI des campagnes.`,
+  sofia: `Tu es Sofia, l'agent Structuration & SOP. Tu génères des organigrammes, tu rédiges des procédures opérationnelles standard (SOP) claires et actionnables. Tu détectes les gaps de process et tu proposes des améliorations.`,
+  felix: `Tu es Félix, l'agent Finance & Marges. Tu calcules les marges par projet, tu génères des prévisions de trésorerie, tu alertes sur les seuils critiques. Tu es rigoureux dans tes analyses financières.`,
+  iris: `Tu es Iris, l'agent Data & Reporting. Tu consolides les KPIs de tous les agents, tu génères des rapports hebdomadaires, tu analyses le ROI par canal d'acquisition. Tu présentes les données de façon claire et actionnable.`,
 }
 
 export default function PromptsEditorPage() {
@@ -94,16 +95,16 @@ export default function PromptsEditorPage() {
 
   function generatePrompt(agentType: AgentType) {
     const config = AGENTS.find(a => a.type === agentType)!
-    const prompt = `Tu es ${config.name}, l'agent ${config.role} de ${clientName || '[nom entreprise]'}, une entreprise specialisee dans les energies renouvelables (poeles a bois, pompes a chaleur, panneaux solaires).
+    const prompt = `Tu es ${config.name}, l'agent ${config.role} de ${clientName || '[nom entreprise]'}, une entreprise spécialisée dans les énergies renouvelables (poêles à bois, pompes à chaleur, panneaux solaires).
 
-ROLE: ${config.description}
+RÔLE: ${config.description}
 
-REGLES:
-- Tu parles toujours en francais
+RÈGLES:
+- Tu parles toujours en français
 - Tu es professionnel mais accessible
-- Tu ne prends aucune decision financiere sans validation
-- Tu respectes la reglementation francaise en vigueur
-- Tu log toutes tes actions pour tracabilite
+- Tu ne prends aucune décision financière sans validation
+- Tu respectes la réglementation française en vigueur
+- Tu log toutes tes actions pour traçabilité
 
 CONNECTEURS DISPONIBLES: ${config.connectors.join(', ')}`
     setEditedPrompts(prev => ({ ...prev, [agentType]: prompt }))
@@ -112,23 +113,19 @@ CONNECTEURS DISPONIBLES: ${config.connectors.join(', ')}`
   const activeConfig = activeTab ? AGENTS.find(a => a.type === activeTab) : null
 
   return (
-    <div>
-      <Link href={`/admin/clients/${clientId}`} className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6">
+    <div className="animate-fade-in">
+      <Link href={`/admin/clients/${clientId}`} className="flex items-center gap-2 text-ink-400 hover:text-ink-600 mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Retour au client
       </Link>
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">System Prompts</h1>
-          <p className="text-gray-500">{clientName} — Editeur no-code</p>
+          <h1 className="text-2xl font-bold text-ink-700">System Prompts</h1>
+          <p className="text-ink-400">{clientName} — Éditeur no-code</p>
         </div>
-        <button
-          onClick={saveAll}
-          disabled={saving}
-          className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50"
-        >
+        <button onClick={saveAll} disabled={saving} className="btn-brand">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-          {saved ? 'Sauvegarde !' : 'Tout sauvegarder'}
+          {saved ? 'Sauvegardé !' : 'Tout sauvegarder'}
         </button>
       </div>
 
@@ -143,12 +140,12 @@ CONNECTEURS DISPONIBLES: ${config.connectors.join(', ')}`
                 key={agent.type}
                 onClick={() => setActiveTab(agent.type as AgentType)}
                 className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-sm font-medium transition ${
-                  activeTab === agent.type ? 'bg-blue-600 text-white' :
-                  agent.active ? 'text-gray-700 hover:bg-gray-100' :
-                  'text-gray-400 hover:bg-gray-50'
+                  activeTab === agent.type ? 'bg-brand-500 text-white' :
+                  agent.active ? 'text-ink-600 hover:bg-surface-50' :
+                  'text-ink-300 hover:bg-surface-50'
                 }`}
               >
-                <span>{config.icon}</span>
+                <AgentAvatar type={config.type as AgentType} size="sm" />
                 <span>{config.name}</span>
                 {!agent.active && <span className="text-xs ml-auto opacity-60">off</span>}
               </button>
@@ -157,15 +154,15 @@ CONNECTEURS DISPONIBLES: ${config.connectors.join(', ')}`
         </div>
 
         {/* Editor */}
-        <div className="flex-1 bg-white rounded-xl shadow-sm p-6">
+        <div className="flex-1 card">
           {activeTab && activeConfig ? (
             <>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{activeConfig.icon}</span>
+                  <AgentAvatar type={activeConfig.type as AgentType} size="sm" />
                   <div>
-                    <h3 className="font-semibold text-gray-900">{activeConfig.name} — {activeConfig.role}</h3>
-                    <p className="text-xs text-gray-500">{activeConfig.description}</p>
+                    <h3 className="font-semibold text-ink-700">{activeConfig.name} — {activeConfig.role}</h3>
+                    <p className="text-xs text-ink-400">{activeConfig.description}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -173,18 +170,18 @@ CONNECTEURS DISPONIBLES: ${config.connectors.join(', ')}`
                     onClick={() => generatePrompt(activeTab)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 transition"
                   >
-                    <Wand2 className="w-3 h-3" /> Generer
+                    <Wand2 className="w-3 h-3" /> Générer
                   </button>
                   <button
                     onClick={() => resetToDefault(activeTab)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition"
+                    className="btn-secondary text-xs py-1.5"
                   >
                     <RotateCcw className="w-3 h-3" /> Reset
                   </button>
                   <button
                     onClick={() => savePrompt(activeTab)}
                     disabled={saving}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 transition disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-brand-500 hover:bg-brand-600 transition disabled:opacity-50"
                   >
                     <Save className="w-3 h-3" /> Sauver
                   </button>
@@ -194,20 +191,20 @@ CONNECTEURS DISPONIBLES: ${config.connectors.join(', ')}`
                 value={editedPrompts[activeTab] || ''}
                 onChange={e => setEditedPrompts(prev => ({ ...prev, [activeTab]: e.target.value }))}
                 placeholder="Entrez le system prompt pour cet agent..."
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y min-h-[300px]"
+                className="w-full border border-surface-200 rounded-lg px-4 py-3 text-sm font-mono focus:ring-2 focus:ring-brand-400 focus:border-transparent resize-y min-h-[300px]"
                 rows={15}
               />
               <div className="flex items-center justify-between mt-3">
-                <p className="text-xs text-gray-400">
-                  {(editedPrompts[activeTab] || '').length} caracteres — ~{Math.ceil((editedPrompts[activeTab] || '').length / 4)} tokens
+                <p className="text-xs text-ink-300">
+                  {(editedPrompts[activeTab] || '').length} caractères — ~{Math.ceil((editedPrompts[activeTab] || '').length / 4)} tokens
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-ink-300">
                   Connecteurs: {activeConfig.connectors.join(', ')}
                 </p>
               </div>
             </>
           ) : (
-            <p className="text-gray-400 text-center py-12">Selectionnez un agent</p>
+            <p className="text-ink-400 text-center py-12">Sélectionnez un agent</p>
           )}
         </div>
       </div>

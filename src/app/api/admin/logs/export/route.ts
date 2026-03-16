@@ -1,9 +1,11 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/security'
+import { renderLogReportPdf } from '@/lib/pdf/report-templates'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const supabase = createServerSupabaseClient()
+  const format = request.nextUrl.searchParams.get('format') || 'csv'
 
   // Auth check
   const { data: { user } } = await supabase.auth.getUser()
@@ -34,6 +36,39 @@ export async function GET() {
   const clientMap = new Map<string, string>()
   clients?.forEach(c => clientMap.set(c.id, c.company_name))
 
+  const date = new Date().toISOString().split('T')[0]
+
+  // PDF export
+  if (format === 'pdf') {
+    const enrichedLogs = (logs || []).map(log => {
+      const agentInfo = agentMap.get(log.agent_id)
+      return {
+        created_at: log.created_at,
+        status: log.status,
+        action: log.action || '',
+        tokens_used: log.tokens_used || 0,
+        duration_ms: log.duration_ms || 0,
+        agent_type: agentInfo?.type || '',
+        agent_name: agentInfo?.name || '',
+        client_name: log.client_id ? (clientMap.get(log.client_id) || '') : '',
+      }
+    })
+
+    const totalLogs = enrichedLogs.length
+    const successCount = enrichedLogs.filter(l => l.status === 'success').length
+    const errorCount = enrichedLogs.filter(l => l.status === 'error').length
+    const totalTokens = enrichedLogs.reduce((s, l) => s + l.tokens_used, 0)
+
+    const pdfBuffer = await renderLogReportPdf(enrichedLogs, { totalLogs, successCount, errorCount, totalTokens })
+
+    return new Response(new Uint8Array(pdfBuffer), {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="cmg-agents-logs-${date}.pdf"`,
+      },
+    })
+  }
+
   // Generate CSV
   const headers = ['date', 'statut', 'agent_type', 'agent_name', 'client', 'action', 'tokens', 'duree_ms', 'resume']
   const rows = (logs || []).map(log => {
@@ -52,7 +87,6 @@ export async function GET() {
   })
 
   const csv = [headers.join(','), ...rows].join('\n')
-  const date = new Date().toISOString().split('T')[0]
 
   return new Response(csv, {
     headers: {

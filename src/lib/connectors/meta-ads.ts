@@ -3,12 +3,43 @@
  * Campaign performance reports, budget monitoring, and alerts
  */
 
+import { isTokenExpired, refreshOAuthToken, persistRefreshedTokens, handleTokenError, withTokenRefresh } from './token-refresh'
+
 const META_API_VERSION = 'v19.0'
 const META_API_BASE = `https://graph.facebook.com/${META_API_VERSION}`
 
 export interface MetaAdsAuth {
   access_token: string
   ad_account_id: string // format: act_XXXXX
+  expires_at?: string
+  refresh_token?: string
+}
+
+// Context for token refresh
+let _connectorId = ''
+let _clientId = ''
+
+export function setMetaAdsContext(connectorId: string, clientId: string) {
+  _connectorId = connectorId
+  _clientId = clientId
+}
+
+async function getValidMetaToken(auth: MetaAdsAuth): Promise<string> {
+  const creds = auth as unknown as Record<string, string>
+  if (!isTokenExpired(creds)) {
+    return auth.access_token
+  }
+  try {
+    const result = await refreshOAuthToken('meta_ads', creds)
+    const updated = await persistRefreshedTokens(_connectorId, creds, result)
+    // Mutate auth in place for subsequent calls in the same session
+    auth.access_token = updated.access_token
+    auth.expires_at = updated.expires_at
+    return updated.access_token
+  } catch (error) {
+    await handleTokenError(_clientId, 'meta_ads', error)
+    throw error
+  }
 }
 
 export interface CampaignSummary {
@@ -53,30 +84,36 @@ export async function listCampaigns(auth: MetaAdsAuth, params?: {
   status?: 'ACTIVE' | 'PAUSED' | 'DELETED' | 'ARCHIVED'
   limit?: number
 }): Promise<CampaignSummary[]> {
-  const fields = 'id,name,status,objective,daily_budget,lifetime_budget,start_time,stop_time'
-  const filterStatus = params?.status ? `&filtering=[{"field":"effective_status","operator":"IN","value":["${params.status}"]}]` : ''
-  const limit = params?.limit || 25
+  async function doList(): Promise<CampaignSummary[]> {
+    const token = await getValidMetaToken(auth)
+    const fields = 'id,name,status,objective,daily_budget,lifetime_budget,start_time,stop_time'
+    const filterStatus = params?.status ? `&filtering=[{"field":"effective_status","operator":"IN","value":["${params.status}"]}]` : ''
+    const limit = params?.limit || 25
 
-  const res = await fetch(
-    `${META_API_BASE}/${auth.ad_account_id}/campaigns?fields=${fields}&limit=${limit}${filterStatus}&access_token=${auth.access_token}`
-  )
-
-  if (!res.ok) {
-    const err = await res.json()
-    throw new Error(`Meta Ads API error: ${err.error?.message || res.status}`)
+    const res = await fetch(
+      `${META_API_BASE}/${auth.ad_account_id}/campaigns?fields=${fields}&limit=${limit}${filterStatus}&access_token=${token}`
+    )
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(`Meta Ads API error: ${err.error?.message || res.status}`)
+    }
+    const data = await res.json()
+    return (data.data || []).map((c: Record<string, unknown>) => ({
+      id: c.id as string,
+      name: c.name as string,
+      status: c.status as string,
+      objective: c.objective as string,
+      daily_budget: c.daily_budget ? Number(c.daily_budget) / 100 : undefined,
+      lifetime_budget: c.lifetime_budget ? Number(c.lifetime_budget) / 100 : undefined,
+      start_time: c.start_time as string | undefined,
+      stop_time: c.stop_time as string | undefined,
+    }))
   }
 
-  const data = await res.json()
-  return (data.data || []).map((c: Record<string, unknown>) => ({
-    id: c.id as string,
-    name: c.name as string,
-    status: c.status as string,
-    objective: c.objective as string,
-    daily_budget: c.daily_budget ? Number(c.daily_budget) / 100 : undefined,
-    lifetime_budget: c.lifetime_budget ? Number(c.lifetime_budget) / 100 : undefined,
-    start_time: c.start_time as string | undefined,
-    stop_time: c.stop_time as string | undefined,
-  }))
+  if (_connectorId && _clientId) {
+    return withTokenRefresh(_connectorId, 'meta_ads', _clientId, auth as unknown as Record<string, string>, () => doList())
+  }
+  return doList()
 }
 
 // ===== Insights =====
@@ -89,25 +126,26 @@ export async function getCampaignInsights(auth: MetaAdsAuth, params?: {
   const fields = 'campaign_id,campaign_name,impressions,clicks,spend,ctr,cpc,cpm,actions,reach,frequency'
   const datePreset = params?.date_preset || 'last_7d'
 
-  let endpoint = `${META_API_BASE}/${auth.ad_account_id}/insights?fields=${fields}&level=campaign&date_preset=${datePreset}&access_token=${auth.access_token}`
+  async function doInsights(): Promise<CampaignInsights[]> {
+    const token = await getValidMetaToken(auth)
+    let endpoint = `${META_API_BASE}/${auth.ad_account_id}/insights?fields=${fields}&level=campaign&date_preset=${datePreset}&access_token=${token}`
 
-  if (params?.time_range) {
-    endpoint = `${META_API_BASE}/${auth.ad_account_id}/insights?fields=${fields}&level=campaign&time_range={"since":"${params.time_range.since}","until":"${params.time_range.until}"}&access_token=${auth.access_token}`
-  }
+    if (params?.time_range) {
+      endpoint = `${META_API_BASE}/${auth.ad_account_id}/insights?fields=${fields}&level=campaign&time_range={"since":"${params.time_range.since}","until":"${params.time_range.until}"}&access_token=${token}`
+    }
 
-  if (params?.campaign_ids && params.campaign_ids.length > 0) {
-    endpoint += `&filtering=[{"field":"campaign.id","operator":"IN","value":${JSON.stringify(params.campaign_ids)}}]`
-  }
+    if (params?.campaign_ids && params.campaign_ids.length > 0) {
+      endpoint += `&filtering=[{"field":"campaign.id","operator":"IN","value":${JSON.stringify(params.campaign_ids)}}]`
+    }
 
-  const res = await fetch(endpoint)
+    const res = await fetch(endpoint)
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(`Meta Ads insights error: ${err.error?.message || res.status}`)
+    }
 
-  if (!res.ok) {
-    const err = await res.json()
-    throw new Error(`Meta Ads insights error: ${err.error?.message || res.status}`)
-  }
-
-  const data = await res.json()
-  return (data.data || []).map((insight: Record<string, unknown>) => {
+    const data = await res.json()
+    return (data.data || []).map((insight: Record<string, unknown>) => {
     const actions = (insight.actions as { action_type: string; value: string }[] | undefined) || []
     const conversions = actions.find(a => a.action_type === 'offsite_conversion.fb_pixel_purchase' || a.action_type === 'lead')
     const conversionCount = conversions ? Number(conversions.value) : 0
@@ -127,7 +165,13 @@ export async function getCampaignInsights(auth: MetaAdsAuth, params?: {
       reach: Number(insight.reach || 0),
       frequency: Number(insight.frequency || 0),
     }
-  })
+    })
+  }
+
+  if (_connectorId && _clientId) {
+    return withTokenRefresh(_connectorId, 'meta_ads', _clientId, auth as unknown as Record<string, string>, () => doInsights())
+  }
+  return doInsights()
 }
 
 // ===== Account-level spend =====
@@ -138,24 +182,30 @@ export async function getAccountSpend(auth: MetaAdsAuth, datePreset: string = 't
   clicks: number
   ctr: number
 }> {
-  const fields = 'spend,impressions,clicks,ctr'
-  const res = await fetch(
-    `${META_API_BASE}/${auth.ad_account_id}/insights?fields=${fields}&date_preset=${datePreset}&access_token=${auth.access_token}`
-  )
-
-  if (!res.ok) {
-    const err = await res.json()
-    throw new Error(`Meta Ads account insights error: ${err.error?.message || res.status}`)
+  async function doSpend() {
+    const token = await getValidMetaToken(auth)
+    const fields = 'spend,impressions,clicks,ctr'
+    const res = await fetch(
+      `${META_API_BASE}/${auth.ad_account_id}/insights?fields=${fields}&date_preset=${datePreset}&access_token=${token}`
+    )
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(`Meta Ads account insights error: ${err.error?.message || res.status}`)
+    }
+    const data = await res.json()
+    const d = data.data?.[0] || {}
+    return {
+      total_spend: Number(d.spend || 0),
+      impressions: Number(d.impressions || 0),
+      clicks: Number(d.clicks || 0),
+      ctr: Number(d.ctr || 0),
+    }
   }
 
-  const data = await res.json()
-  const d = data.data?.[0] || {}
-  return {
-    total_spend: Number(d.spend || 0),
-    impressions: Number(d.impressions || 0),
-    clicks: Number(d.clicks || 0),
-    ctr: Number(d.ctr || 0),
+  if (_connectorId && _clientId) {
+    return withTokenRefresh(_connectorId, 'meta_ads', _clientId, auth as unknown as Record<string, string>, () => doSpend())
   }
+  return doSpend()
 }
 
 // ===== Budget Alerts =====

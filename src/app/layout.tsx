@@ -1,12 +1,16 @@
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Bai_Jamjuree } from "next/font/google"
 import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"] })
+const baiJamjuree = Bai_Jamjuree({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+})
 
 export const metadata: Metadata = {
-  title: "CMG Agents - Plateforme Multi-Agents IA",
-  description: "Plateforme SaaS multi-agents IA pour entreprises ENR",
+  title: "CMG Agent - Vos agents IA au service de votre entreprise",
+  description: "Plateforme simple et intuitive pour automatiser votre marketing, SEO et communication avec l'intelligence artificielle",
 }
 
 export default function RootLayout({
@@ -16,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${baiJamjuree.className} antialiased`}>
         {children}
       </body>
     </html>

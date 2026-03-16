@@ -9,13 +9,14 @@ import {
   Building2, Bot, Plug, Settings, Rocket,
   ChevronRight, ChevronLeft, Check, AlertCircle, Loader2
 } from 'lucide-react'
+import { AgentAvatar } from '@/components/agents/agent-avatars'
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5
 
 const STEPS = [
   { num: 1, label: 'Profil', icon: Building2, desc: 'Infos entreprise & plan' },
-  { num: 2, label: 'Agents', icon: Bot, desc: 'Selection des agents' },
-  { num: 3, label: 'Connecteurs', icon: Plug, desc: 'APIs & integrations' },
+  { num: 2, label: 'Agents', icon: Bot, desc: 'Sélection des agents' },
+  { num: 3, label: 'Connecteurs', icon: Plug, desc: 'APIs & intégrations' },
   { num: 4, label: 'Config', icon: Settings, desc: 'System prompts' },
   { num: 5, label: 'Go Live', icon: Rocket, desc: 'Activation finale' },
 ]
@@ -120,7 +121,7 @@ export default function OnboardingPage() {
 
   async function saveStep(nextStep: OnboardingStep) {
     if (!selectedClientId) {
-      setError('Selectionnez un client d\'abord')
+      setError('Sélectionnez un client d\'abord')
       return
     }
     setLoading(true)
@@ -139,7 +140,6 @@ export default function OnboardingPage() {
           break
         }
         case 2: {
-          // Update agents active status
           const { data: agents } = await supabase.from('agents').select('*').eq('client_id', selectedClientId)
           if (agents) {
             for (const agent of agents) {
@@ -149,12 +149,10 @@ export default function OnboardingPage() {
               }
             }
           }
-          // Update client active_agents array
           await supabase.from('clients').update({ active_agents: selectedAgents }).eq('id', selectedClientId)
           break
         }
         case 3: {
-          // Create connectors that don't exist
           const { data: existing } = await supabase.from('connectors').select('type').eq('client_id', selectedClientId)
           const existingTypes = existing?.map(c => c.type) || []
           for (const connType of selectedConnectors) {
@@ -171,7 +169,6 @@ export default function OnboardingPage() {
           break
         }
         case 4: {
-          // Update system prompts
           for (const [agentType, prompt] of Object.entries(prompts)) {
             if (prompt.trim()) {
               await supabase.from('agents')
@@ -183,7 +180,6 @@ export default function OnboardingPage() {
           break
         }
         case 5: {
-          // Mark as onboarded
           await supabase.from('clients').update({
             onboarded_at: new Date().toISOString(),
             is_active: true,
@@ -201,26 +197,26 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Onboarding Client</h1>
-        <p className="text-gray-500">Guide de configuration en 5 etapes</p>
+        <h1 className="text-2xl font-bold text-ink-700">Onboarding Client</h1>
+        <p className="text-ink-400">Guide de configuration en 5 étapes</p>
       </div>
 
       {/* Client selector */}
       {!clientId && (
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Selectionner un client</label>
+        <div className="card mb-6">
+          <label className="block text-sm font-medium text-ink-600 mb-2">Sélectionner un client</label>
           <select
             value={selectedClientId}
             onChange={(e) => setSelectedClientId(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="input"
           >
             <option value="">-- Choisir un client --</option>
             {clients.filter(c => !c.onboarded_at).map(c => (
               <option key={c.id} value={c.id}>{c.company_name} ({PLAN_LABELS[c.plan]})</option>
             ))}
-            <optgroup label="Deja onboarde">
+            <optgroup label="Déjà onboardé">
               {clients.filter(c => c.onboarded_at).map(c => (
                 <option key={c.id} value={c.id}>{c.company_name} ✓</option>
               ))}
@@ -233,10 +229,10 @@ export default function OnboardingPage() {
       <div className="flex items-center gap-2 mb-8">
         {STEPS.map((s, i) => (
           <div key={s.num} className="flex items-center flex-1">
-            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg flex-1 ${
-              step === s.num ? 'bg-blue-600 text-white' :
-              step > s.num ? 'bg-green-100 text-green-700' :
-              'bg-gray-100 text-gray-400'
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg flex-1 transition ${
+              step === s.num ? 'bg-brand-500 text-white' :
+              step > s.num ? 'bg-emerald-100 text-emerald-700' :
+              'bg-surface-100 text-ink-300'
             }`}>
               {step > s.num ? (
                 <Check className="w-4 h-4" />
@@ -247,7 +243,7 @@ export default function OnboardingPage() {
                 <p className="text-xs font-semibold">{s.label}</p>
               </div>
             </div>
-            {i < STEPS.length - 1 && <ChevronRight className="w-4 h-4 text-gray-300 mx-1 flex-shrink-0" />}
+            {i < STEPS.length - 1 && <ChevronRight className="w-4 h-4 text-ink-200 mx-1 flex-shrink-0" />}
           </div>
         ))}
       </div>
@@ -260,48 +256,44 @@ export default function OnboardingPage() {
       )}
 
       {/* Step content */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <div className="card mb-6">
         {/* Step 1: Profile */}
         {step === 1 && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Profil entreprise</h2>
-            <p className="text-sm text-gray-500 mb-6">Informations de base et choix du plan</p>
+            <h2 className="text-lg font-semibold text-ink-700 mb-1">Profil entreprise</h2>
+            <p className="text-sm text-ink-400 mb-6">Informations de base et choix du plan</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nom de l&apos;entreprise *</label>
-                <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                <label className="block text-sm font-medium text-ink-600 mb-1">Nom de l&apos;entreprise *</label>
+                <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} className="input" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Telephone</label>
-                <input type="text" value={phone} onChange={e => setPhone(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                <label className="block text-sm font-medium text-ink-600 mb-1">Téléphone</label>
+                <input type="text" value={phone} onChange={e => setPhone(e.target.value)} className="input" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-                <input type="text" value={address} onChange={e => setAddress(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                <label className="block text-sm font-medium text-ink-600 mb-1">Adresse</label>
+                <input type="text" value={address} onChange={e => setAddress(e.target.value)} className="input" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">SIRET</label>
-                <input type="text" value={siret} onChange={e => setSiret(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                <label className="block text-sm font-medium text-ink-600 mb-1">SIRET</label>
+                <input type="text" value={siret} onChange={e => setSiret(e.target.value)} className="input" />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">Plan tarifaire</label>
+              <label className="block text-sm font-medium text-ink-600 mb-3">Plan tarifaire</label>
               <div className="grid grid-cols-3 gap-4">
-                {(['basic', 'pro', 'full'] as PlanType[]).map(p => {
-                  const prices = { basic: 99, pro: 249, full: 499 }
+                {(['starter', 'pro', 'enterprise'] as PlanType[]).map(p => {
+                  const prices = { starter: 29, pro: 79, enterprise: 199 }
                   const limits = PLAN_AGENTS_LIMIT
                   return (
                     <button key={p} onClick={() => setPlan(p)}
                       className={`p-4 rounded-xl border-2 text-left transition ${
-                        plan === p ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                        plan === p ? 'border-brand-400 bg-brand-50' : 'border-surface-200 hover:border-surface-300'
                       }`}>
-                      <p className="font-bold text-gray-900">{PLAN_LABELS[p]}</p>
-                      <p className="text-2xl font-bold text-gray-900 mt-1">{prices[p]}€<span className="text-sm font-normal text-gray-500">/mois</span></p>
-                      <p className="text-sm text-gray-500 mt-1">{limits[p]} agents max</p>
+                      <p className="font-bold text-ink-700">{PLAN_LABELS[p]}</p>
+                      <p className="text-2xl font-bold text-ink-700 mt-1">{prices[p]}€<span className="text-sm font-normal text-ink-400">/mois</span></p>
+                      <p className="text-sm text-ink-400 mt-1">{limits[p]} agents max</p>
                     </button>
                   )
                 })}
@@ -313,10 +305,10 @@ export default function OnboardingPage() {
         {/* Step 2: Agents */}
         {step === 2 && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Selection des agents</h2>
-            <p className="text-sm text-gray-500 mb-6">
-              Choisissez jusqu&apos;a {planLimit} agents (plan {PLAN_LABELS[plan]}) —
-              <span className="font-medium"> {selectedAgents.length}/{planLimit} selectionne(s)</span>
+            <h2 className="text-lg font-semibold text-ink-700 mb-1">Sélection des agents</h2>
+            <p className="text-sm text-ink-400 mb-6">
+              Choisissez jusqu&apos;à {planLimit} agents (plan {PLAN_LABELS[plan]}) —
+              <span className="font-medium"> {selectedAgents.length}/{planLimit} sélectionné(s)</span>
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {AGENTS.map(agent => {
@@ -325,22 +317,22 @@ export default function OnboardingPage() {
                 return (
                   <button key={agent.type} onClick={() => !isDisabled && toggleAgent(agent.type)}
                     className={`flex items-start gap-3 p-4 rounded-xl border-2 text-left transition ${
-                      isSelected ? 'border-blue-500 bg-blue-50' :
-                      isDisabled ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed' :
-                      'border-gray-200 hover:border-gray-300'
+                      isSelected ? 'border-brand-400 bg-brand-50' :
+                      isDisabled ? 'border-surface-100 bg-surface-50 opacity-50 cursor-not-allowed' :
+                      'border-surface-200 hover:border-surface-300'
                     }`}>
-                    <span className="text-2xl">{agent.icon}</span>
+                    <AgentAvatar type={agent.type as AgentType} size="sm" />
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <p className="font-semibold text-gray-900">{agent.name}</p>
+                        <p className="font-semibold text-ink-700">{agent.name}</p>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          agent.category === 'strategie' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
+                          agent.category === 'strategie' ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-emerald-700'
                         }`}>
-                          {agent.category === 'strategie' ? 'Strategie' : 'Communication'}
+                          {agent.category === 'strategie' ? 'Stratégie' : 'Communication'}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 font-medium">{agent.role}</p>
-                      <p className="text-xs text-gray-400 mt-1">{agent.description}</p>
+                      <p className="text-sm text-ink-500 font-medium">{agent.role}</p>
+                      <p className="text-xs text-ink-300 mt-1">{agent.description}</p>
                     </div>
                   </button>
                 )
@@ -352,8 +344,8 @@ export default function OnboardingPage() {
         {/* Step 3: Connectors */}
         {step === 3 && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Connecteurs</h2>
-            <p className="text-sm text-gray-500 mb-6">Selectionnez les integrations a configurer. Les credentials seront renseignes ensuite.</p>
+            <h2 className="text-lg font-semibold text-ink-700 mb-1">Connecteurs</h2>
+            <p className="text-sm text-ink-400 mb-6">Sélectionnez les intégrations à configurer. Les credentials seront renseignés ensuite.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {CONNECTOR_OPTIONS.map(conn => {
                 const isRelevant = conn.forAgents.some(a => selectedAgents.includes(a))
@@ -361,19 +353,19 @@ export default function OnboardingPage() {
                 return (
                   <button key={conn.type} onClick={() => toggleConnector(conn.type)}
                     className={`flex items-center gap-3 p-4 rounded-xl border-2 text-left transition ${
-                      isSelected ? 'border-blue-500 bg-blue-50' :
-                      isRelevant ? 'border-gray-200 hover:border-gray-300' :
-                      'border-gray-100 bg-gray-50 opacity-60'
+                      isSelected ? 'border-brand-400 bg-brand-50' :
+                      isRelevant ? 'border-surface-200 hover:border-surface-300' :
+                      'border-surface-100 bg-surface-50 opacity-60'
                     }`}>
                     <span className="text-xl">{conn.icon}</span>
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900">{conn.label}</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="font-medium text-ink-700">{conn.label}</p>
+                      <p className="text-xs text-ink-300">
                         {conn.forAgents.map(a => AGENTS.find(ag => ag.type === a)?.name).filter(Boolean).join(', ')}
                       </p>
                     </div>
-                    {isSelected && <Check className="w-5 h-5 text-blue-600" />}
-                    {isRelevant && !isSelected && <span className="text-xs text-amber-500 font-medium">Recommande</span>}
+                    {isSelected && <Check className="w-5 h-5 text-brand-500" />}
+                    {isRelevant && !isSelected && <span className="text-xs text-amber-500 font-medium">Recommandé</span>}
                   </button>
                 )
               })}
@@ -384,22 +376,22 @@ export default function OnboardingPage() {
         {/* Step 4: System Prompts */}
         {step === 4 && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Configuration des prompts</h2>
-            <p className="text-sm text-gray-500 mb-6">Personnalisez le comportement de chaque agent (optionnel — des prompts par defaut seront utilises sinon).</p>
+            <h2 className="text-lg font-semibold text-ink-700 mb-1">Configuration des prompts</h2>
+            <p className="text-sm text-ink-400 mb-6">Personnalisez le comportement de chaque agent (optionnel — des prompts par défaut seront utilisés sinon).</p>
             <div className="space-y-4">
               {selectedAgents.map(agentType => {
                 const config = AGENTS.find(a => a.type === agentType)!
                 return (
-                  <div key={agentType} className="border border-gray-200 rounded-xl p-4">
+                  <div key={agentType} className="border border-surface-200 rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg">{config.icon}</span>
-                      <p className="font-semibold text-gray-900">{config.name} — {config.role}</p>
+                      <AgentAvatar type={config.type as AgentType} size="sm" />
+                      <p className="font-semibold text-ink-700">{config.name} — {config.role}</p>
                     </div>
                     <textarea
                       value={prompts[agentType] || ''}
                       onChange={e => setPrompts(prev => ({ ...prev, [agentType]: e.target.value }))}
-                      placeholder={`Ex: Tu es ${config.name}, l'agent ${config.role} de [nom entreprise]. Tu parles en francais, de maniere professionnelle...`}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
+                      placeholder={`Ex: Tu es ${config.name}, l'agent ${config.role} de [nom entreprise]. Tu parles en français, de manière professionnelle...`}
+                      className="w-full border border-surface-200 rounded-lg px-4 py-3 text-sm font-mono focus:ring-2 focus:ring-brand-400 focus:border-transparent resize-y"
                       rows={4}
                     />
                   </div>
@@ -412,40 +404,40 @@ export default function OnboardingPage() {
         {/* Step 5: Go Live */}
         {step === 5 && (
           <div className="text-center py-8">
-            <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-              <Rocket className="w-10 h-10 text-green-600" />
+            <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">
+              <Rocket className="w-10 h-10 text-emerald-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Pret a lancer !</h2>
-            <p className="text-gray-500 mb-8 max-w-md mx-auto">
-              Verifiez le resume ci-dessous et cliquez sur &quot;Activer&quot; pour finaliser l&apos;onboarding.
+            <h2 className="text-2xl font-bold text-ink-700 mb-2">Prêt à lancer !</h2>
+            <p className="text-ink-400 mb-8 max-w-md mx-auto">
+              Vérifiez le résumé ci-dessous et cliquez sur &quot;Activer&quot; pour finaliser l&apos;onboarding.
             </p>
-            <div className="bg-gray-50 rounded-xl p-6 text-left max-w-lg mx-auto">
+            <div className="bg-surface-50 rounded-xl p-6 text-left max-w-lg mx-auto">
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Entreprise</span>
-                  <span className="text-sm font-medium text-gray-900">{companyName}</span>
+                  <span className="text-sm text-ink-400">Entreprise</span>
+                  <span className="text-sm font-medium text-ink-700">{companyName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Plan</span>
-                  <span className="text-sm font-medium text-gray-900">{PLAN_LABELS[plan]}</span>
+                  <span className="text-sm text-ink-400">Plan</span>
+                  <span className="text-sm font-medium text-ink-700">{PLAN_LABELS[plan]}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Agents actifs</span>
-                  <span className="text-sm font-medium text-gray-900">{selectedAgents.length}/{planLimit}</span>
+                  <span className="text-sm text-ink-400">Agents actifs</span>
+                  <span className="text-sm font-medium text-ink-700">{selectedAgents.length}/{planLimit}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Connecteurs</span>
-                  <span className="text-sm font-medium text-gray-900">{selectedConnectors.length}</span>
+                  <span className="text-sm text-ink-400">Connecteurs</span>
+                  <span className="text-sm font-medium text-ink-700">{selectedConnectors.length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Prompts personnalises</span>
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm text-ink-400">Prompts personnalisés</span>
+                  <span className="text-sm font-medium text-ink-700">
                     {Object.values(prompts).filter(p => p.trim()).length}
                   </span>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <p className="text-xs text-gray-400">Agents: {selectedAgents.map(a => AGENTS.find(ag => ag.type === a)?.name).join(', ')}</p>
+              <div className="mt-4 pt-4 border-t border-surface-200">
+                <p className="text-xs text-ink-300">Agents: {selectedAgents.map(a => AGENTS.find(ag => ag.type === a)?.name).join(', ')}</p>
               </div>
             </div>
           </div>
@@ -458,15 +450,15 @@ export default function OnboardingPage() {
           onClick={() => setStep((step - 1) as OnboardingStep)}
           disabled={step === 1}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition ${
-            step === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'
+            step === 1 ? 'text-ink-200 cursor-not-allowed' : 'text-ink-600 hover:bg-surface-50'
           }`}
         >
-          <ChevronLeft className="w-4 h-4" /> Precedent
+          <ChevronLeft className="w-4 h-4" /> Précédent
         </button>
         <button
           onClick={() => saveStep(step === 5 ? 5 : ((step + 1) as OnboardingStep))}
           disabled={loading || !selectedClientId}
-          className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50"
+          className="btn-brand px-6"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
           {step === 5 ? '🚀 Activer le client' : 'Suivant'}

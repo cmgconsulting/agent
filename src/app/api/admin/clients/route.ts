@@ -98,6 +98,16 @@ export async function GET() {
       return NextResponse.json({ error: 'Non authentifie' }, { status: 401 })
     }
 
+    // Verify admin role
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    if (profile?.role !== 'admin') {
+      return NextResponse.json({ error: 'Non autorise' }, { status: 403 })
+    }
+
     const { data: clients, error } = await supabase
       .from('clients')
       .select('*')

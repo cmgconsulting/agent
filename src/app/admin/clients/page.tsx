@@ -3,6 +3,7 @@ import { PLAN_LABELS, PLAN_AGENTS_LIMIT } from '@/lib/agents-config'
 import type { PlanType } from '@/types/database'
 import { Users, Plus } from 'lucide-react'
 import Link from 'next/link'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default async function ClientsListPage() {
   const supabase = createServerSupabaseClient()
@@ -18,35 +19,29 @@ export default async function ClientsListPage() {
   ])
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
-          <p className="text-gray-500">{clients?.length || 0} clients enregistres</p>
-        </div>
-        <Link
-          href="/admin/clients/new"
-          className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition"
-        >
-          <Plus className="w-4 h-4" /> Nouveau client
-        </Link>
-      </div>
+    <div className="animate-fade-in">
+      <PageHeader
+        icon={Users}
+        title="Clients"
+        subtitle={`${clients?.length || 0} clients enregistrés`}
+        action={{ label: 'Nouveau client', href: '/admin/clients/new', icon: Plus }}
+      />
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="card p-0 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-100">
+              <tr className="text-left text-xs font-medium text-ink-400 uppercase tracking-wider border-b border-surface-100">
                 <th className="px-6 py-3">Entreprise</th>
                 <th className="px-6 py-3">Plan</th>
                 <th className="px-6 py-3">Agents</th>
                 <th className="px-6 py-3">Connecteurs</th>
                 <th className="px-6 py-3">Statut</th>
-                <th className="px-6 py-3">Cree le</th>
+                <th className="px-6 py-3">Créé le</th>
                 <th className="px-6 py-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-surface-50">
               {clients && clients.length > 0 ? (
                 clients.map(client => {
                   const clientActiveAgents = allAgents?.filter(a => a.client_id === client.id && a.active).length || 0
@@ -54,44 +49,44 @@ export default async function ClientsListPage() {
                   const planLimit = PLAN_AGENTS_LIMIT[client.plan as PlanType]
 
                   return (
-                    <tr key={client.id} className="hover:bg-gray-50 transition">
+                    <tr key={client.id} className="hover:bg-surface-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
-                            <span className="text-blue-600 font-bold text-sm">{client.company_name.charAt(0)}</span>
+                          <div className="w-9 h-9 rounded-xl bg-brand-50 flex items-center justify-center">
+                            <span className="text-brand-600 font-bold text-sm">{client.company_name.charAt(0)}</span>
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900 text-sm">{client.company_name}</p>
-                            <p className="text-xs text-gray-400">{client.siret || '—'}</p>
+                            <p className="font-medium text-ink-700 text-sm">{client.company_name}</p>
+                            <p className="text-xs text-ink-300">{client.siret || '—'}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          client.plan === 'full' ? 'bg-purple-100 text-purple-700' :
+                          client.plan === 'enterprise' ? 'bg-purple-100 text-purple-700' :
                           client.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
-                          'bg-gray-100 text-gray-700'
+                          'bg-emerald-100 text-emerald-700'
                         }`}>
                           {PLAN_LABELS[client.plan as PlanType]}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{clientActiveAgents}/{planLimit}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{clientConnectors}</td>
+                      <td className="px-6 py-4 text-sm text-ink-600">{clientActiveAgents}/{planLimit}</td>
+                      <td className="px-6 py-4 text-sm text-ink-600">{clientConnectors}</td>
                       <td className="px-6 py-4">
                         <span className={`flex items-center gap-1.5 text-xs font-medium ${
-                          client.is_active ? 'text-green-600' : 'text-red-500'
+                          client.is_active ? 'text-emerald-600' : 'text-red-500'
                         }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${client.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full ${client.is_active ? 'bg-emerald-500' : 'bg-red-500'}`} />
                           {client.is_active ? 'Actif' : 'Suspendu'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm text-ink-400">
                         {new Date(client.created_at).toLocaleDateString('fr-FR')}
                       </td>
                       <td className="px-6 py-4">
                         <Link href={`/admin/clients/${client.id}`}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                          Voir &rarr;
+                          className="text-brand-500 hover:text-brand-600 text-sm font-medium transition-colors">
+                          Voir
                         </Link>
                       </td>
                     </tr>
@@ -100,8 +95,8 @@ export default async function ClientsListPage() {
               ) : (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center">
-                    <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                    <p className="text-gray-400">Aucun client</p>
+                    <Users className="w-12 h-12 mx-auto mb-3 text-surface-200" />
+                    <p className="text-ink-300">Aucun client</p>
                   </td>
                 </tr>
               )}

@@ -3,6 +3,8 @@
  * Used by Marc for email management
  */
 
+import { isTokenExpired, refreshOAuthToken, persistRefreshedTokens, handleTokenError, withTokenRefresh } from './token-refresh'
+
 interface GmailMessage {
   id: string
   threadId: string
@@ -25,39 +27,36 @@ interface GmailSendPayload {
   threadId?: string
 }
 
+// Context for token refresh (set by caller via setGmailContext)
+let _connectorId = ''
+let _clientId = ''
+
+export function setGmailContext(connectorId: string, clientId: string) {
+  _connectorId = connectorId
+  _clientId = clientId
+}
+
 // ===== Auth helpers =====
 
+let _currentCreds: Record<string, string> = {}
+
 async function getValidAccessToken(creds: Record<string, string>): Promise<string> {
-  // If token is still valid, return it
-  if (creds.access_token && creds.expires_at) {
-    const expiresAt = parseInt(creds.expires_at)
-    if (Date.now() < expiresAt - 60000) {
-      return creds.access_token
-    }
+  _currentCreds = creds
+
+  if (!isTokenExpired(creds)) {
+    return creds.access_token
   }
 
   // Refresh the token
-  if (!creds.refresh_token) {
-    throw new Error('No refresh token available — reconnect Gmail')
+  try {
+    const result = await refreshOAuthToken('gmail', creds)
+    const updated = await persistRefreshedTokens(_connectorId, creds, result)
+    _currentCreds = updated
+    return updated.access_token
+  } catch (error) {
+    await handleTokenError(_clientId, 'gmail', error)
+    throw error
   }
-
-  const res = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: process.env.GOOGLE_CLIENT_ID || '',
-      client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
-      refresh_token: creds.refresh_token,
-      grant_type: 'refresh_token',
-    }),
-  })
-
-  if (!res.ok) {
-    throw new Error(`Gmail token refresh failed: ${res.status}`)
-  }
-
-  const data = await res.json()
-  return data.access_token
 }
 
 // ===== Reading emails =====
@@ -69,30 +68,34 @@ export async function listMessages(params: {
   labelIds?: string[]
 }): Promise<GmailMessage[]> {
   const { creds, query, maxResults = 20, labelIds } = params
-  const token = await getValidAccessToken(creds)
 
-  const qParams = new URLSearchParams({ maxResults: String(maxResults) })
-  if (query) qParams.set('q', query)
-  if (labelIds?.length) qParams.set('labelIds', labelIds.join(','))
+  async function doList(c: Record<string, string>): Promise<GmailMessage[]> {
+    const token = await getValidAccessToken(c)
+    const qParams = new URLSearchParams({ maxResults: String(maxResults) })
+    if (query) qParams.set('q', query)
+    if (labelIds?.length) qParams.set('labelIds', labelIds.join(','))
 
-  const listRes = await fetch(
-    `https://gmail.googleapis.com/gmail/v1/users/me/messages?${qParams}`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  )
+    const listRes = await fetch(
+      `https://gmail.googleapis.com/gmail/v1/users/me/messages?${qParams}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    if (!listRes.ok) throw new Error(`Gmail list error: ${listRes.status}`)
 
-  if (!listRes.ok) throw new Error(`Gmail list error: ${listRes.status}`)
+    const listData = await listRes.json()
+    const messageIds: { id: string }[] = listData.messages || []
 
-  const listData = await listRes.json()
-  const messageIds: { id: string }[] = listData.messages || []
-
-  // Fetch full message details (batch up to 10)
-  const messages: GmailMessage[] = []
-  for (const { id } of messageIds.slice(0, 10)) {
-    const msg = await getMessage({ creds, messageId: id })
-    if (msg) messages.push(msg)
+    const messages: GmailMessage[] = []
+    for (const { id } of messageIds.slice(0, 10)) {
+      const msg = await getMessage({ creds: _currentCreds, messageId: id })
+      if (msg) messages.push(msg)
+    }
+    return messages
   }
 
-  return messages
+  if (_connectorId && _clientId) {
+    return withTokenRefresh(_connectorId, 'gmail', _clientId, creds, doList)
+  }
+  return doList(creds)
 }
 
 export async function getMessage(params: {
@@ -100,27 +103,41 @@ export async function getMessage(params: {
   messageId: string
 }): Promise<GmailMessage | null> {
   const { creds, messageId } = params
-  const token = await getValidAccessToken(creds)
 
-  const res = await fetch(
-    `https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageId}?format=full`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  )
+  async function doGet(c: Record<string, string>): Promise<GmailMessage | null> {
+    const token = await getValidAccessToken(c)
+    const res = await fetch(
+      `https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageId}?format=full`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) throw new Error(`Gmail auth error: ${res.status}`)
+      return null
+    }
+    return parseGmailMessage(await res.json())
+  }
 
-  if (!res.ok) return null
+  if (_connectorId && _clientId) {
+    return withTokenRefresh(_connectorId, 'gmail', _clientId, creds, doGet)
+  }
+  return doGet(creds)
+}
 
-  const data = await res.json()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parseGmailMessage(data: any): GmailMessage {
   const headers = data.payload?.headers || []
 
   const getHeader = (name: string) =>
-    headers.find((h: { name: string; value: string }) => h.name.toLowerCase() === name.toLowerCase())?.value || ''
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    headers.find((h: any) => h.name?.toLowerCase() === name.toLowerCase())?.value || ''
 
   // Extract body text
   let body = ''
   if (data.payload?.body?.data) {
     body = Buffer.from(data.payload.body.data, 'base64url').toString('utf-8')
   } else if (data.payload?.parts) {
-    const textPart = data.payload.parts.find((p: { mimeType: string }) => p.mimeType === 'text/plain')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const textPart = data.payload.parts.find((p: any) => p.mimeType === 'text/plain')
     if (textPart?.body?.data) {
       body = Buffer.from(textPart.body.data, 'base64url').toString('utf-8')
     }
@@ -135,28 +152,30 @@ export async function getMessage(params: {
     from: getHeader('From'),
     to: getHeader('To'),
     date: getHeader('Date'),
-    body: body.slice(0, 5000), // Limit body size
+    body: body.slice(0, 5000),
   }
 }
 
 // ===== Labels =====
 
 export async function listLabels(creds: Record<string, string>): Promise<{ id: string; name: string; type: string }[]> {
-  const token = await getValidAccessToken(creds)
+  async function doList(c: Record<string, string>) {
+    const token = await getValidAccessToken(c)
+    const res = await fetch(
+      'https://gmail.googleapis.com/gmail/v1/users/me/labels',
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    if (!res.ok) throw new Error(`Gmail labels error: ${res.status}`)
+    const data = await res.json()
+    return (data.labels || []).map((l: { id: string; name: string; type: string }) => ({
+      id: l.id, name: l.name, type: l.type,
+    }))
+  }
 
-  const res = await fetch(
-    'https://gmail.googleapis.com/gmail/v1/users/me/labels',
-    { headers: { Authorization: `Bearer ${token}` } }
-  )
-
-  if (!res.ok) throw new Error(`Gmail labels error: ${res.status}`)
-
-  const data = await res.json()
-  return (data.labels || []).map((l: { id: string; name: string; type: string }) => ({
-    id: l.id,
-    name: l.name,
-    type: l.type,
-  }))
+  if (_connectorId && _clientId) {
+    return withTokenRefresh(_connectorId, 'gmail', _clientId, creds, doList)
+  }
+  return doList(creds)
 }
 
 export async function modifyLabels(params: {
@@ -166,21 +185,25 @@ export async function modifyLabels(params: {
   removeLabelIds?: string[]
 }): Promise<void> {
   const { creds, messageId, addLabelIds = [], removeLabelIds = [] } = params
-  const token = await getValidAccessToken(creds)
 
-  const res = await fetch(
-    `https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageId}/modify`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ addLabelIds, removeLabelIds }),
-    }
-  )
+  async function doModify(c: Record<string, string>) {
+    const token = await getValidAccessToken(c)
+    const res = await fetch(
+      `https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageId}/modify`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addLabelIds, removeLabelIds }),
+      }
+    )
+    if (!res.ok) throw new Error(`Gmail modify error: ${res.status}`)
+  }
 
-  if (!res.ok) throw new Error(`Gmail modify error: ${res.status}`)
+  if (_connectorId && _clientId) {
+    await withTokenRefresh(_connectorId, 'gmail', _clientId, creds, doModify)
+  } else {
+    await doModify(creds)
+  }
 }
 
 // ===== Sending =====
@@ -190,46 +213,47 @@ export async function sendEmail(params: {
   email: GmailSendPayload
 }): Promise<{ id: string; threadId: string }> {
   const { creds, email } = params
-  const token = await getValidAccessToken(creds)
 
-  // Build RFC 2822 message
-  const lines: string[] = [
-    `To: ${email.to}`,
-    `Subject: ${email.subject}`,
-    'Content-Type: text/html; charset=utf-8',
-    'MIME-Version: 1.0',
-  ]
-  if (email.cc) lines.push(`Cc: ${email.cc}`)
-  if (email.bcc) lines.push(`Bcc: ${email.bcc}`)
-  if (email.replyToMessageId) {
-    lines.push(`In-Reply-To: ${email.replyToMessageId}`)
-    lines.push(`References: ${email.replyToMessageId}`)
-  }
-  lines.push('', email.body)
+  async function doSend(c: Record<string, string>): Promise<{ id: string; threadId: string }> {
+    const token = await getValidAccessToken(c)
 
-  const raw = Buffer.from(lines.join('\r\n')).toString('base64url')
-
-  const body: Record<string, string> = { raw }
-  if (email.threadId) body.threadId = email.threadId
-
-  const res = await fetch(
-    'https://gmail.googleapis.com/gmail/v1/users/me/messages/send',
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
+    const lines: string[] = [
+      `To: ${email.to}`,
+      `Subject: ${email.subject}`,
+      'Content-Type: text/html; charset=utf-8',
+      'MIME-Version: 1.0',
+    ]
+    if (email.cc) lines.push(`Cc: ${email.cc}`)
+    if (email.bcc) lines.push(`Bcc: ${email.bcc}`)
+    if (email.replyToMessageId) {
+      lines.push(`In-Reply-To: ${email.replyToMessageId}`)
+      lines.push(`References: ${email.replyToMessageId}`)
     }
-  )
+    lines.push('', email.body)
 
-  if (!res.ok) {
-    const err = await res.json()
-    throw new Error(`Gmail send error: ${err.error?.message || res.status}`)
+    const raw = Buffer.from(lines.join('\r\n')).toString('base64url')
+    const body: Record<string, string> = { raw }
+    if (email.threadId) body.threadId = email.threadId
+
+    const res = await fetch(
+      'https://gmail.googleapis.com/gmail/v1/users/me/messages/send',
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }
+    )
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(`Gmail send error: ${err.error?.message || res.status}`)
+    }
+    return res.json()
   }
 
-  return res.json()
+  if (_connectorId && _clientId) {
+    return withTokenRefresh(_connectorId, 'gmail', _clientId, creds, doSend)
+  }
+  return doSend(creds)
 }
 
 // ===== Email categorization =====
