@@ -4,8 +4,8 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { encryptCredentials } from '@/lib/vault'
 
 export const dynamic = 'force-dynamic'
-const GOOGLE_ADS_CLIENT_ID = process.env.GOOGLE_ADS_CLIENT_ID || ''
-const GOOGLE_ADS_CLIENT_SECRET = process.env.GOOGLE_ADS_CLIENT_SECRET || ''
+const GOOGLE_ADS_CLIENT_ID = process.env.GOOGLE_ADS_CLIENT_ID || process.env.GOOGLE_CLIENT_ID || ''
+const GOOGLE_ADS_CLIENT_SECRET = process.env.GOOGLE_ADS_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET || ''
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const REDIRECT_URI = `${APP_URL}/api/connectors/google-ads/callback`
 
@@ -88,10 +88,9 @@ export async function GET(request: Request) {
       .upsert({
         client_id: stateData.clientId,
         type: 'google_ads',
-        name: 'Google Ads',
         status: 'active',
         credentials_encrypted: encryptedCreds,
-        last_sync_at: new Date().toISOString(),
+        last_tested_at: new Date().toISOString(),
         config: { scopes: ['adwords'] },
       }, {
         onConflict: 'client_id,type',

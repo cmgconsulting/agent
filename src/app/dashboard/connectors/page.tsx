@@ -7,7 +7,7 @@ import { CONNECTORS, CONNECTOR_CATEGORIES } from '@/lib/connectors-config'
 import type { ConnectorConfig } from '@/lib/connectors-config'
 import type { ConnectorType, ConnectorStatus } from '@/types/database'
 import { ConnectionWizard } from '@/components/connectors/connection-wizard'
-import { Plug, Wifi, WifiOff, AlertTriangle, Search } from 'lucide-react'
+import { Plug, Wifi, WifiOff, AlertTriangle, Search, CheckCircle, X } from 'lucide-react'
 import { SectionHelp } from '@/components/ui/help-tooltip'
 import { PageHeader } from '@/components/ui/page-header'
 
@@ -26,6 +26,7 @@ export default function ClientConnectorsPage() {
   const [wizardConnector, setWizardConnector] = useState<ConnectorConfig | null>(null)
   const [filterCategory, setFilterCategory] = useState<string>('all')
   const [search, setSearch] = useState('')
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   const loadConnectors = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -52,15 +53,24 @@ export default function ClientConnectorsPage() {
     loadConnectors()
   }, [loadConnectors])
 
-  // Check URL for ?connected=type (OAuth callback success)
+  // Check URL for ?connected=type or ?error=message (OAuth callback)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const connected = params.get('connected')
+    const error = params.get('error')
     if (connected) {
-      // Reload connectors to show updated status
+      // Find the connector label for a nicer message
+      const connConfig = CONNECTORS.find(c => c.type === connected)
+      const label = connConfig?.label || connected
+      setToast({ type: 'success', message: `${label} connecte avec succes !` })
       loadConnectors()
-      // Clean URL
       window.history.replaceState({}, '', '/dashboard/connectors')
+      // Auto-dismiss after 5s
+      setTimeout(() => setToast(null), 5000)
+    } else if (error) {
+      setToast({ type: 'error', message: decodeURIComponent(error) })
+      window.history.replaceState({}, '', '/dashboard/connectors')
+      setTimeout(() => setToast(null), 8000)
     }
   }, [loadConnectors])
 
@@ -208,6 +218,24 @@ export default function ClientConnectorsPage() {
         <div className="text-center py-12 text-ink-300">
           <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">Aucun connecteur ne correspond a votre recherche.</p>
+        </div>
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium animate-slide-up ${
+          toast.type === 'success'
+            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+            : 'bg-red-50 text-red-800 border border-red-200'
+        }`}>
+          {toast.type === 'success'
+            ? <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+            : <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+          }
+          {toast.message}
+          <button onClick={() => setToast(null)} className="ml-2 p-0.5 rounded hover:bg-black/5">
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
 

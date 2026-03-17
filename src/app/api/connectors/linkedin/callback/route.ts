@@ -87,11 +87,10 @@ export async function GET(request: Request) {
       .from('connectors')
       .upsert({
         client_id: stateData.clientId,
-        type: 'linkedin',
-        name: 'LinkedIn',
+        type: 'linkedin_api',
         status: 'active',
         credentials_encrypted: encryptedCreds,
-        last_sync_at: new Date().toISOString(),
+        last_tested_at: new Date().toISOString(),
         config: { scopes: ['r_organization_social', 'rw_organization_admin'] },
       }, {
         onConflict: 'client_id,type',
@@ -107,7 +106,7 @@ export async function GET(request: Request) {
     cookieStore.delete('li_oauth_state')
 
     return NextResponse.redirect(
-      `${APP_URL}/dashboard/connectors?connected=linkedin`
+      `${APP_URL}/dashboard/connectors?connected=linkedin_api`
     )
   } catch (error) {
     console.error('LinkedIn callback error:', error)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, CheckCircle, ArrowRight, ArrowLeft, ExternalLink, RefreshCw, AlertTriangle, Zap, Key, ShieldCheck } from 'lucide-react'
+import { X, CheckCircle, ExternalLink, AlertTriangle, Zap, Key, ShieldCheck, Loader2 } from 'lucide-react'
 import type { ConnectorType } from '@/types/database'
 import type { ConnectorConfig } from '@/lib/connectors-config'
 
@@ -209,25 +209,28 @@ interface ConnectionWizardProps {
   onClose: () => void
 }
 
-export function ConnectionWizard({ connector, onSuccess, onClose }: ConnectionWizardProps) {
-  const [step, setStep] = useState(1)
+export function ConnectionWizard({ connector, currentStatus, onSuccess, onClose }: ConnectionWizardProps) {
   const [credentials, setCredentials] = useState<Record<string, string>>({})
-  const [testing, setTesting] = useState(false)
-  const [testError, setTestError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [testError, setTestError] = useState<string | null>(null)
+  const [testSuccess, setTestSuccess] = useState<string | null>(null)
+  const [connected, setConnected] = useState(currentStatus === 'active')
+  const [testing, setTesting] = useState(false)
 
   const info = CONNECTOR_INFO[connector.type]
   const isOAuth = connector.authMethod === 'oauth2' && connector.fields.length === 0
-  const totalSteps = isOAuth ? 2 : 3
+  const hasExtraOAuthFields = connector.authMethod === 'oauth2' && connector.fields.length > 0
 
   function handleFieldChange(key: string, value: string) {
     setCredentials(prev => ({ ...prev, [key]: value }))
     setTestError(null)
+    setTestSuccess(null)
   }
 
   async function handleSaveApiKey() {
     setSaving(true)
     setTestError(null)
+    setTestSuccess(null)
     try {
       const res = await fetch('/api/connectors/save', {
         method: 'POST',
@@ -237,11 +240,23 @@ export function ConnectionWizard({ connector, onSuccess, onClose }: ConnectionWi
           credentials,
         }),
       })
+      const data = await res.json()
       if (!res.ok) {
-        const data = await res.json()
         throw new Error(data.error || 'Erreur lors de la sauvegarde')
       }
-      setStep(totalSteps)
+      // The save route auto-tests
+      if (data.test_ok) {
+        setTestSuccess(data.message || 'Connexion reussie !')
+        setConnected(true)
+        onSuccess()
+      } else {
+        // Saved but test failed
+        setTestSuccess('Identifiants sauvegardes')
+        if (data.message) {
+          setTestError(data.message)
+        }
+        onSuccess()
+      }
     } catch (err) {
       setTestError(err instanceof Error ? err.message : 'Erreur inconnue')
     } finally {
@@ -252,16 +267,20 @@ export function ConnectionWizard({ connector, onSuccess, onClose }: ConnectionWi
   async function handleTestConnection() {
     setTesting(true)
     setTestError(null)
+    setTestSuccess(null)
     try {
       const res = await fetch('/api/connectors/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ connector_type: connector.type }),
       })
+      const data = await res.json()
       if (!res.ok) {
-        const data = await res.json()
         throw new Error(data.error || 'Le test a echoue')
       }
+      setTestSuccess(data.message || 'Connexion active !')
+      setConnected(true)
+      onSuccess()
     } catch (err) {
       setTestError(err instanceof Error ? err.message : 'Erreur de test')
     } finally {
@@ -269,9 +288,14 @@ export function ConnectionWizard({ connector, onSuccess, onClose }: ConnectionWi
     }
   }
 
+  // Map connector type to API route path
+  const OAUTH_ROUTE_MAP: Partial<Record<ConnectorType, string>> = {
+    linkedin_api: 'linkedin',
+  }
+
   function handleOAuthStart() {
-    // Redirect to OAuth flow
-    window.location.href = `/api/connectors/${connector.type.replace(/_/g, '-')}/connect`
+    const routePath = OAUTH_ROUTE_MAP[connector.type] || connector.type.replace(/_/g, '-')
+    window.location.href = `/api/connectors/${routePath}/connect`
   }
 
   const allFieldsFilled = connector.fields
@@ -281,18 +305,18 @@ export function ConnectionWizard({ connector, onSuccess, onClose }: ConnectionWi
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-hover w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-surface-100">
+        <div className="flex items-center justify-between p-5 border-b border-surface-100">
           <div className="flex items-center gap-3">
             <span className="text-2xl">{connector.icon}</span>
             <div>
               <h2 className="font-bold text-ink-700">{connector.label}</h2>
               <p className="text-xs text-ink-300">
-                {info?.agentName ? `Utilise par ${info.agentName}` : connector.category}
+                {info?.agentName ? `Agent : ${info.agentName}` : connector.category}
               </p>
             </div>
           </div>
@@ -301,127 +325,98 @@ export function ConnectionWizard({ connector, onSuccess, onClose }: ConnectionWi
           </button>
         </div>
 
-        {/* Progress bar */}
-        <div className="px-6 pt-4">
-          <div className="flex items-center gap-2 mb-1">
-            {Array.from({ length: totalSteps }, (_, i) => (
-              <div key={i} className="flex-1 flex items-center gap-2">
-                <div className={`flex-1 h-1.5 rounded-full transition-colors ${
-                  i + 1 <= step ? 'bg-brand-400' : 'bg-surface-200'
-                }`} />
+        <div className="p-5">
+          {/* ===== SUCCESS STATE ===== */}
+          {connected && !testError && (
+            <div className="text-center space-y-4 py-2">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto">
+                <CheckCircle className="w-8 h-8 text-emerald-500" />
               </div>
-            ))}
-          </div>
-          <p className="text-xs text-ink-300 text-right">Etape {step}/{totalSteps}</p>
-        </div>
-
-        {/* Content */}
-        <div className="p-6">
-          {/* ===== STEP 1: Explanation ===== */}
-          {step === 1 && (
-            <div className="space-y-4">
-              <div className="bg-brand-50 rounded-2xl p-4">
-                <p className="text-sm text-ink-600 leading-relaxed">
-                  {info?.description || `Connectez ${connector.label} a vos agents IA.`}
+              <div>
+                <h3 className="text-lg font-bold text-ink-700">{connector.label} connecte !</h3>
+                <p className="text-sm text-ink-400 mt-1">
+                  {testSuccess || (info?.agentName
+                    ? `${info.agentName} peut maintenant utiliser ${connector.label}.`
+                    : `Votre connexion ${connector.label} est active.`
+                  )}
                 </p>
               </div>
 
-              {info?.benefits && (
-                <div>
-                  <p className="text-xs font-bold text-ink-300 uppercase tracking-wider mb-2">Ce que ca vous apporte</p>
-                  <ul className="space-y-2">
-                    {info.benefits.map((benefit, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-ink-600">
-                        <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                        {benefit}
-                      </li>
-                    ))}
-                  </ul>
+              <button
+                onClick={handleTestConnection}
+                disabled={testing}
+                className="btn-secondary w-full flex items-center justify-center gap-2"
+              >
+                {testing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                {testing ? 'Test en cours...' : 'Tester la connexion'}
+              </button>
+
+              {testSuccess && (
+                <div className="flex items-start gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700">
+                  <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  {testSuccess}
                 </div>
               )}
 
-              <div className="flex items-center gap-2 text-xs text-ink-300 bg-surface-50 rounded-xl p-3">
-                <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                Vos identifiants sont chiffres (AES-256) et ne sont jamais partages.
-              </div>
-
-              <button onClick={() => setStep(2)} className="btn-brand w-full flex items-center justify-center gap-2">
-                Continuer
-                <ArrowRight className="w-4 h-4" />
+              <button onClick={onClose} className="btn-brand w-full">
+                Fermer
               </button>
             </div>
           )}
 
-          {/* ===== STEP 2: OAuth flow OR API key entry ===== */}
-          {step === 2 && isOAuth && (
+          {/* ===== OAUTH FLOW (pure OAuth, no extra fields) ===== */}
+          {!connected && isOAuth && (
             <div className="space-y-4">
-              <div className="text-center py-4">
-                <div className="w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center mx-auto mb-4">
-                  <Zap className="w-8 h-8 text-brand-500" />
-                </div>
-                <h3 className="font-semibold text-ink-700 mb-2">Autoriser l&apos;acces</h3>
-                <p className="text-sm text-ink-400">
-                  Vous allez etre redirige vers {connector.label} pour autoriser l&apos;acces securise.
-                  Aucun mot de passe ne sera partage.
+              {/* Brief description */}
+              {info?.description && (
+                <p className="text-sm text-ink-500 leading-relaxed">
+                  {info.description}
                 </p>
-              </div>
+              )}
 
-              {/* Extra fields for OAuth connectors that need them (e.g. google_analytics property_id) */}
-              {connector.fields.length > 0 && (
-                <div className="space-y-3">
-                  {connector.fields.map(field => (
-                    <div key={field.key}>
-                      <label className="block text-sm font-medium text-ink-600 mb-1">{field.label}</label>
-                      <input
-                        type={field.type}
-                        value={credentials[field.key] || ''}
-                        onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                        placeholder={field.placeholder}
-                        className="input w-full"
-                      />
-                      {field.helpText && (
-                        <p className="text-xs text-ink-300 mt-1">{field.helpText}</p>
-                      )}
+              {/* Benefits */}
+              {info?.benefits && (
+                <div className="bg-surface-50 rounded-xl p-4 space-y-2">
+                  {info.benefits.map((benefit, i) => (
+                    <div key={i} className="flex items-start gap-2 text-sm text-ink-600">
+                      <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      {benefit}
                     </div>
                   ))}
                 </div>
               )}
 
-              <button onClick={handleOAuthStart} className="btn-brand w-full flex items-center justify-center gap-2">
+              <div className="text-center py-2">
+                <div className="w-14 h-14 rounded-2xl bg-brand-50 flex items-center justify-center mx-auto mb-3">
+                  <Zap className="w-7 h-7 text-brand-500" />
+                </div>
+                <p className="text-sm text-ink-400">
+                  Cliquez ci-dessous pour autoriser l&apos;acces securise. Aucun mot de passe n&apos;est partage.
+                </p>
+              </div>
+
+              <button onClick={handleOAuthStart} className="btn-brand w-full flex items-center justify-center gap-2 py-3">
                 <ExternalLink className="w-4 h-4" />
-                Autoriser {connector.label}
+                Connecter {connector.label}
               </button>
 
-              <button onClick={() => setStep(1)} className="btn-ghost w-full flex items-center justify-center gap-2 text-sm">
-                <ArrowLeft className="w-4 h-4" />
-                Retour
-              </button>
+              <div className="flex items-center gap-2 text-xs text-ink-300 justify-center">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                Connexion securisee et chiffree
+              </div>
             </div>
           )}
 
-          {step === 2 && !isOAuth && (
+          {/* ===== OAUTH + EXTRA FIELDS (e.g. Google Ads customer_id, GA property_id) ===== */}
+          {!connected && hasExtraOAuthFields && (
             <div className="space-y-4">
-              {/* API key instructions */}
-              {info?.apiKeyInstructions && (
-                <div className="bg-surface-50 rounded-2xl p-4">
-                  <p className="text-xs font-bold text-ink-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                    <Key className="w-3.5 h-3.5" />
-                    Ou trouver vos identifiants
-                  </p>
-                  <ol className="space-y-2">
-                    {info.apiKeyInstructions.map((instruction, i) => (
-                      <li key={i} className="flex gap-2 text-sm text-ink-600">
-                        <span className="w-5 h-5 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                          {i + 1}
-                        </span>
-                        {instruction}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
+              {info?.description && (
+                <p className="text-sm text-ink-500 leading-relaxed">
+                  {info.description}
+                </p>
               )}
 
-              {/* Fields */}
+              {/* Extra fields first */}
               <div className="space-y-3">
                 {connector.fields.map(field => (
                   <div key={field.key}>
@@ -443,6 +438,77 @@ export function ConnectionWizard({ connector, onSuccess, onClose }: ConnectionWi
                 ))}
               </div>
 
+              <button
+                onClick={handleOAuthStart}
+                disabled={!allFieldsFilled}
+                className="btn-brand w-full flex items-center justify-center gap-2 py-3 disabled:opacity-50"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Connecter {connector.label}
+              </button>
+
+              <div className="flex items-center gap-2 text-xs text-ink-300 justify-center">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                Connexion securisee et chiffree
+              </div>
+            </div>
+          )}
+
+          {/* ===== API KEY / WEBHOOK FLOW ===== */}
+          {!connected && !isOAuth && !hasExtraOAuthFields && (
+            <div className="space-y-4">
+              {/* Brief description */}
+              {info?.description && (
+                <p className="text-sm text-ink-500 leading-relaxed">
+                  {info.description}
+                </p>
+              )}
+
+              {/* API key instructions — collapsible for cleaner UX */}
+              {info?.apiKeyInstructions && (
+                <details className="group">
+                  <summary className="flex items-center gap-2 text-xs font-semibold text-ink-400 uppercase tracking-wider cursor-pointer hover:text-ink-600 transition-colors">
+                    <Key className="w-3.5 h-3.5" />
+                    Comment obtenir vos identifiants ?
+                    <span className="text-ink-300 group-open:rotate-90 transition-transform">&#9654;</span>
+                  </summary>
+                  <ol className="mt-3 space-y-2 pl-1">
+                    {info.apiKeyInstructions.map((instruction, i) => (
+                      <li key={i} className="flex gap-2 text-sm text-ink-600">
+                        <span className="w-5 h-5 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                          {i + 1}
+                        </span>
+                        {instruction}
+                      </li>
+                    ))}
+                  </ol>
+                </details>
+              )}
+
+              {/* Fields */}
+              <div className="space-y-3">
+                {connector.fields.map(field => (
+                  <div key={field.key}>
+                    <label className="block text-sm font-medium text-ink-600 mb-1">
+                      {field.label}
+                      {field.required && <span className="text-red-400 ml-0.5">*</span>}
+                    </label>
+                    <input
+                      type={field.type}
+                      value={credentials[field.key] || ''}
+                      onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                      placeholder={field.placeholder}
+                      className="input w-full"
+                      autoComplete="off"
+                    />
+                    {field.helpText && (
+                      <p className="text-xs text-ink-300 mt-1">{field.helpText}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Error message */}
               {testError && (
                 <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
                   <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -450,68 +516,32 @@ export function ConnectionWizard({ connector, onSuccess, onClose }: ConnectionWi
                 </div>
               )}
 
+              {/* Success message */}
+              {testSuccess && (
+                <div className="flex items-start gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700">
+                  <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  {testSuccess}
+                </div>
+              )}
+
+              {/* Submit button */}
               <button
                 onClick={handleSaveApiKey}
                 disabled={!allFieldsFilled || saving}
-                className="btn-brand w-full flex items-center justify-center gap-2 disabled:opacity-50"
+                className="btn-brand w-full flex items-center justify-center gap-2 py-3 disabled:opacity-50"
               >
                 {saving ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <ArrowRight className="w-4 h-4" />
+                  <Zap className="w-4 h-4" />
                 )}
                 {saving ? 'Connexion en cours...' : 'Connecter'}
               </button>
 
-              <button onClick={() => setStep(1)} className="btn-ghost w-full flex items-center justify-center gap-2 text-sm">
-                <ArrowLeft className="w-4 h-4" />
-                Retour
-              </button>
-            </div>
-          )}
-
-          {/* ===== FINAL STEP: Success ===== */}
-          {step === totalSteps && step > 1 && (
-            <div className="text-center space-y-4 py-4">
-              <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center mx-auto animate-bounce-soft">
-                <CheckCircle className="w-10 h-10 text-emerald-500" />
+              <div className="flex items-center gap-2 text-xs text-ink-300 justify-center">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                Identifiants chiffres (AES-256) — jamais partages
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-ink-700">{connector.label} est connecte !</h3>
-                <p className="text-sm text-ink-400 mt-1">
-                  {info?.agentName
-                    ? `${info.agentName} peut maintenant utiliser ${connector.label} pour vous aider.`
-                    : `Votre connexion ${connector.label} est active.`
-                  }
-                </p>
-              </div>
-
-              <button
-                onClick={handleTestConnection}
-                disabled={testing}
-                className="btn-secondary w-full flex items-center justify-center gap-2"
-              >
-                {testing ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Zap className="w-4 h-4" />
-                )}
-                {testing ? 'Test en cours...' : 'Tester la connexion'}
-              </button>
-
-              {testError && (
-                <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  {testError}
-                </div>
-              )}
-
-              <button
-                onClick={() => { onSuccess(); onClose() }}
-                className="btn-brand w-full"
-              >
-                Terminer
-              </button>
             </div>
           )}
         </div>
