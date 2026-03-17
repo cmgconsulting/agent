@@ -43,8 +43,8 @@ html {
   border-radius: 4px;
 }
 
-/* Animations douces pour transitions */
-* {
+/* Animations douces pour transitions — ciblé sur les éléments interactifs */
+button, a, input, select, textarea, [class*="transition"] {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
