@@ -311,10 +311,10 @@ export default function TeamPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        icon={Users}
+        icon={<Users className="w-5 h-5 text-brand-500" />}
         title="Équipe"
         subtitle="Gestion des membres et des accès"
-        action={{ label: 'Inviter un membre', onClick: () => setShowInviteModal(true), icon: Plus }}
+        action={{ label: 'Inviter un membre', onClick: () => setShowInviteModal(true), icon: <Plus className="w-4 h-4" /> }}
       />
 
       {/* Success banner */}

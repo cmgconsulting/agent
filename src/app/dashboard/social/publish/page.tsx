@@ -125,7 +125,7 @@ export default function SocialPublishPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
-        icon={Send}
+        icon={<Send className="w-5 h-5 text-brand-500" />}
         title="Publier"
         subtitle="Créez et publiez du contenu sur vos réseaux sociaux"
       />

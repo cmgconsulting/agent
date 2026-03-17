@@ -297,7 +297,7 @@ export default function BillingPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       <PageHeader
-        icon={Coins}
+        icon={<Coins className="w-5 h-5 text-brand-500" />}
         title="Consommation & Facturation"
         subtitle="Suivez votre utilisation de tokens et gérez votre abonnement"
       />

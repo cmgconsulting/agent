@@ -109,7 +109,7 @@ export default function ClientConnectorsPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        icon={Plug}
+        icon={<Plug className="w-5 h-5 text-brand-500" />}
         title="Connexions"
         subtitle={`${connectedCount} service${connectedCount > 1 ? 's' : ''} connecte${connectedCount > 1 ? 's' : ''} sur ${CONNECTORS.length} disponibles`}
       />

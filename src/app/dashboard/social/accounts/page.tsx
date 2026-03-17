@@ -110,7 +110,7 @@ export default function SocialAccountsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
-        icon={Users}
+        icon={<Users className="w-5 h-5 text-brand-500" />}
         title="Comptes sociaux"
         subtitle="Connectez et gérez vos réseaux sociaux"
       />

@@ -231,7 +231,7 @@ export default function AnalyticsPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        icon={TrendingUp}
+        icon={<TrendingUp className="w-5 h-5 text-brand-500" />}
         title="Analytiques ROI"
         subtitle="Mesurez le retour sur investissement de vos agents IA"
       />

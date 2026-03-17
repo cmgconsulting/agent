@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { HelpCircle, X } from 'lucide-react'
 
 interface HelpTooltipProps {
@@ -11,6 +11,38 @@ interface HelpTooltipProps {
 
 export function HelpTooltip({ text, position = 'top', className = '' }: HelpTooltipProps) {
   const [show, setShow] = useState(false)
+  const tooltipRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLSpanElement>(null)
+
+  const adjustPosition = useCallback(() => {
+    if (!show || !tooltipRef.current) return
+    const rect = tooltipRef.current.getBoundingClientRect()
+    const tooltip = tooltipRef.current
+
+    // Reset styles
+    tooltip.style.left = ''
+    tooltip.style.right = ''
+    tooltip.style.transform = ''
+
+    // Check if tooltip goes off-screen left
+    if (rect.left < 8) {
+      tooltip.style.left = '0'
+      tooltip.style.transform = 'translateX(0)'
+    }
+    // Check if tooltip goes off-screen right
+    if (rect.right > window.innerWidth - 8) {
+      tooltip.style.left = 'auto'
+      tooltip.style.right = '0'
+      tooltip.style.transform = 'translateX(0)'
+    }
+  }, [show])
+
+  useEffect(() => {
+    if (show) {
+      // Small delay to let the tooltip render first
+      requestAnimationFrame(adjustPosition)
+    }
+  }, [show, adjustPosition])
 
   const positionClasses = {
     top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
@@ -20,7 +52,7 @@ export function HelpTooltip({ text, position = 'top', className = '' }: HelpTool
   }
 
   return (
-    <span className={`relative inline-flex ${className}`}>
+    <span ref={containerRef} className={`relative inline-flex ${className}`}>
       <button
         type="button"
         onClick={() => setShow(!show)}
@@ -32,12 +64,16 @@ export function HelpTooltip({ text, position = 'top', className = '' }: HelpTool
         <HelpCircle className="w-4 h-4" />
       </button>
       {show && (
-        <div className={`absolute z-50 ${positionClasses[position]} animate-fade-in`}>
-          <div className="bg-ink-600 text-white text-xs font-medium px-3 py-2 rounded-lg shadow-lg max-w-[240px] leading-relaxed">
+        <div
+          ref={tooltipRef}
+          className={`absolute z-[60] ${positionClasses[position]} animate-fade-in`}
+        >
+          <div className="bg-ink-600 text-white text-xs font-medium px-3 py-2 rounded-lg shadow-lg max-w-[280px] w-max leading-relaxed"
+            style={{ maxWidth: 'min(280px, calc(100vw - 2rem))' }}>
             {text}
             <button
               type="button"
-              onClick={() => setShow(false)}
+              onClick={(e) => { e.stopPropagation(); setShow(false) }}
               className="absolute -top-1 -right-1 w-4 h-4 bg-ink-500 rounded-full flex items-center justify-center hover:bg-ink-400 md:hidden"
             >
               <X className="w-2.5 h-2.5" />
@@ -57,6 +93,32 @@ interface SectionHelpProps {
 
 export function SectionHelp({ title, description, tips }: SectionHelpProps) {
   const [show, setShow] = useState(false)
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  // Close on click outside
+  useEffect(() => {
+    if (!show) return
+    function handleClick(e: MouseEvent) {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setShow(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [show])
+
+  // Adjust position if overflows right
+  useEffect(() => {
+    if (!show || !panelRef.current) return
+    requestAnimationFrame(() => {
+      if (!panelRef.current) return
+      const rect = panelRef.current.getBoundingClientRect()
+      if (rect.right > window.innerWidth - 16) {
+        panelRef.current.style.left = 'auto'
+        panelRef.current.style.right = '0'
+      }
+    })
+  }, [show])
 
   return (
     <div className="relative inline-flex">
@@ -69,11 +131,15 @@ export function SectionHelp({ title, description, tips }: SectionHelpProps) {
         <span>Comment ça marche ?</span>
       </button>
       {show && (
-        <div className="absolute top-full left-0 mt-2 z-50 animate-slide-up">
-          <div className="bg-white border border-surface-200 rounded-2xl shadow-card p-4 max-w-sm">
-            <div className="flex items-start justify-between mb-2">
+        <div
+          ref={panelRef}
+          className="absolute top-full left-0 mt-2 z-[60] animate-slide-up"
+          style={{ maxWidth: 'min(24rem, calc(100vw - 2rem))' }}
+        >
+          <div className="bg-white border border-surface-200 rounded-2xl shadow-card p-4">
+            <div className="flex items-start justify-between mb-2 gap-2">
               <h4 className="font-semibold text-ink-700 text-sm">{title}</h4>
-              <button onClick={() => setShow(false)} className="text-ink-300 hover:text-ink-500">
+              <button onClick={() => setShow(false)} className="text-ink-300 hover:text-ink-500 flex-shrink-0">
                 <X className="w-4 h-4" />
               </button>
             </div>

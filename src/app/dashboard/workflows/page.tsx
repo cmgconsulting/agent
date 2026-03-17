@@ -839,10 +839,10 @@ function WorkflowList({
   return (
     <div className="animate-fade-in">
       <PageHeader
-        icon={GitBranch}
+        icon={<GitBranch className="w-5 h-5 text-brand-500" />}
         title="Workflows"
         subtitle="Automatisez les tâches multi-agents"
-        action={{ label: 'Nouveau workflow', onClick: onCreate, icon: Plus }}
+        action={{ label: 'Nouveau workflow', onClick: onCreate, icon: <Plus className="w-4 h-4" /> }}
       />
 
       {/* Feedback banners */}
@@ -890,7 +890,7 @@ function WorkflowList({
       {/* Empty state */}
       {!loading && !error && workflows.length === 0 && (
         <EmptyState
-          icon={GitBranch}
+          icon={<GitBranch className="w-5 h-5 text-brand-500" />}
           title="Aucun workflow"
           description="Créez votre premier workflow pour automatiser les tâches entre vos agents IA"
           actionLabel="Créer un workflow"

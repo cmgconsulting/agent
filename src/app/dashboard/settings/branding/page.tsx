@@ -419,7 +419,7 @@ export default function BrandingSettingsPage() {
 
       <div className="max-w-5xl mx-auto pb-32 animate-fade-in">
         <PageHeader
-          icon={Palette}
+          icon={<Palette className="w-5 h-5 text-brand-500" />}
           title="Identité visuelle"
           subtitle="Configurez votre branding pour les exports de documents"
         />

@@ -541,10 +541,10 @@ export default function TasksPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        icon={ClipboardList}
+        icon={<ClipboardList className="w-5 h-5 text-brand-500" />}
         title="Tâches"
         subtitle="Tableau Kanban de l'équipe"
-        action={{ label: 'Nouvelle tâche', onClick: () => setShowCreateModal(true), icon: Plus }}
+        action={{ label: 'Nouvelle tâche', onClick: () => setShowCreateModal(true), icon: <Plus className="w-4 h-4" /> }}
       />
 
       {/* Loading */}

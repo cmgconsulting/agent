@@ -94,7 +94,7 @@ export default function SocialAnalyticsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
-        icon={TrendingUp}
+        icon={<TrendingUp className="w-5 h-5 text-brand-500" />}
         title="Analytiques"
         subtitle="Performances de vos réseaux sociaux"
       />

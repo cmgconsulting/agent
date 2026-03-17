@@ -143,7 +143,7 @@ export default function PreferencesPage() {
   return (
     <div className="animate-fade-in max-w-4xl">
       <PageHeader
-        icon={Brain}
+        icon={<Brain className="w-5 h-5 text-brand-500" />}
         title="Préférences IA"
         subtitle="Personnalisez le comportement de vos agents pour qu'ils s'adaptent à vos besoins"
       />

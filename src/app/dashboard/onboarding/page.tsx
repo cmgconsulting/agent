@@ -112,7 +112,29 @@ export default function ClientOnboardingPage() {
       .eq('user_id', user.id)
       .single()
 
-    if (!client) { setInitialLoading(false); return }
+    if (!client) {
+      // Auto-create client if missing
+      const { data: newClient } = await supabase
+        .from('clients')
+        .insert({
+          user_id: user.id,
+          company_name: user.email?.split('@')[0] || 'Mon entreprise',
+          plan: 'starter',
+          is_active: true,
+          active_agents: [],
+        })
+        .select('id')
+        .single()
+
+      if (newClient) {
+        await supabase.from('company_memory').insert({ client_id: newClient.id }).select()
+        setClientId(newClient.id)
+      } else {
+        setError('Impossible de créer votre profil. Contactez l\'administrateur.')
+      }
+      setInitialLoading(false)
+      return
+    }
 
     setClientId(client.id)
     setScore((client as Record<string, unknown>).onboarding_score as number || 0)
@@ -176,7 +198,10 @@ export default function ClientOnboardingPage() {
   }
 
   async function saveCurrentStep() {
-    if (!clientId) return
+    if (!clientId) {
+      setError('Profil client introuvable. Rechargez la page ou contactez l\'administrateur.')
+      return
+    }
     setLoading(true)
     setError('')
     setSuccess('')

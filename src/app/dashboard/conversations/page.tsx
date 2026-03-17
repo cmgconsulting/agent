@@ -508,9 +508,9 @@ export default function ConversationsPage() {
   // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] -m-8 overflow-hidden">
+    <div className="flex h-[calc(100vh-4rem)] -m-4 lg:-m-8 overflow-hidden">
       {/* ── LEFT SIDEBAR ─────────────────────────────────────────────────────── */}
-      <aside className="w-72 flex-shrink-0 bg-surface-50 border-r border-surface-200 flex flex-col">
+      <aside className="hidden md:flex w-72 flex-shrink-0 bg-surface-50 border-r border-surface-200 flex-col">
         {/* Feedback summary */}
         <div className="px-4 pt-4 pb-2">
           <div className="bg-white rounded-xl border border-surface-100 px-4 py-3 flex items-center justify-between">
@@ -905,7 +905,7 @@ export default function ConversationsPage() {
             onClick={() => setShowPreferences(false)}
           />
           {/* Panel */}
-          <div className="fixed right-0 top-0 bottom-0 w-96 bg-white border-l border-surface-200 shadow-2xl z-40 flex flex-col">
+          <div className="fixed right-0 top-0 bottom-0 w-full sm:w-96 bg-white border-l border-surface-200 shadow-2xl z-40 flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-surface-100">
               <div>
                 <h2 className="font-semibold text-ink-700">Préférences de l&apos;agent</h2>

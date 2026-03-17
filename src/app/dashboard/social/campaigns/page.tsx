@@ -130,10 +130,10 @@ export default function SocialCampaignsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
-        icon={Target}
+        icon={<Target className="w-5 h-5 text-brand-500" />}
         title="Campagnes"
         subtitle="Gérez vos campagnes publicitaires"
-        action={{ label: 'Nouvelle campagne', onClick: () => setShowForm(true), icon: Plus }}
+        action={{ label: 'Nouvelle campagne', onClick: () => setShowForm(true), icon: <Plus className="w-4 h-4" /> }}
       />
 
       {/* Create form modal */}

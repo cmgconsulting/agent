@@ -31,35 +31,44 @@ export function PageHeader({ icon, greeting, title, subtitle, action }: PageHead
     return icon
   }
 
+  const renderActionIcon = () => {
+    if (!action?.icon) return null
+    if (isLucideIcon(action.icon)) {
+      const ActionIcon = action.icon
+      return <ActionIcon className="w-4 h-4" />
+    }
+    return action.icon
+  }
+
   return (
-    <div className="flex items-start justify-between mb-8 animate-fade-in">
-      <div>
+    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8 animate-fade-in">
+      <div className="min-w-0">
         {greeting && (
           <p className="text-sm text-ink-300 mb-1">{greeting}</p>
         )}
         <div className="flex items-center gap-3">
           {icon && (
-            <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center flex-shrink-0">
               {renderIcon()}
             </div>
           )}
-          <div>
-            <h1 className="text-2xl font-bold text-ink-700">{title}</h1>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-ink-700 truncate">{title}</h1>
             {subtitle && (
-              <p className="text-sm text-ink-300 mt-0.5">{subtitle}</p>
+              <p className="text-sm text-ink-300 mt-0.5 truncate">{subtitle}</p>
             )}
           </div>
         </div>
       </div>
       {action && (
         action.href ? (
-          <a href={action.href} className="btn-brand flex items-center gap-2">
-            {action.icon && (isLucideIcon(action.icon) ? (() => { const ActionIcon = action.icon as LucideIcon; return <ActionIcon className="w-4 h-4" /> })() : action.icon)}
+          <a href={action.href} className="btn-brand flex items-center justify-center gap-2 flex-shrink-0 whitespace-nowrap text-sm">
+            {renderActionIcon()}
             {action.label}
           </a>
         ) : (
-          <button onClick={action.onClick} className="btn-brand flex items-center gap-2">
-            {action.icon && (isLucideIcon(action.icon) ? (() => { const ActionIcon = action.icon as LucideIcon; return <ActionIcon className="w-4 h-4" /> })() : action.icon)}
+          <button onClick={action.onClick} className="btn-brand flex items-center justify-center gap-2 flex-shrink-0 whitespace-nowrap text-sm">
+            {renderActionIcon()}
             {action.label}
           </button>
         )

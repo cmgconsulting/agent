@@ -109,10 +109,10 @@ export default function KnowledgePage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        icon={FolderOpen}
+        icon={<FolderOpen className="w-5 h-5 text-brand-500" />}
         title="Base de connaissances"
         subtitle="Documents et ressources pour vos agents"
-        action={{ label: showUpload ? 'Fermer' : 'Ajouter un document', onClick: () => setShowUpload(!showUpload), icon: Plus }}
+        action={{ label: showUpload ? 'Fermer' : 'Ajouter un document', onClick: () => setShowUpload(!showUpload), icon: <Plus className="w-4 h-4" /> }}
       />
       <div className="mb-6">
         <SectionHelp

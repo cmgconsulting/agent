@@ -94,10 +94,10 @@ export default function SocialOverviewPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
-        icon={Share2}
+        icon={<Share2 className="w-5 h-5 text-brand-500" />}
         title="Réseaux sociaux"
         subtitle="Gérez vos comptes, publications et performances"
-        action={{ label: 'Publier', href: '/dashboard/social/publish', icon: Plus }}
+        action={{ label: 'Publier', href: '/dashboard/social/publish', icon: <Plus className="w-4 h-4" /> }}
       />
       <div className="flex items-center justify-between mb-4">
         <SectionHelp
