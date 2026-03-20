@@ -13,13 +13,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Non authentifie' }, { status: 401 })
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('client_id')
-      .eq('id', user.id)
+    const { data: client } = await supabase
+      .from('clients')
+      .select('id')
+      .eq('user_id', user.id)
       .single()
 
-    if (!profile?.client_id) {
+    if (!client?.id) {
       return NextResponse.json({ error: 'Profil client introuvable' }, { status: 404 })
     }
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     const { data: connector } = await adminClient
       .from('connectors')
       .select('*')
-      .eq('client_id', profile.client_id)
+      .eq('client_id', client.id)
       .eq('type', connector_type)
       .single()
 

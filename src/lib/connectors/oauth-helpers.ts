@@ -26,13 +26,13 @@ export async function initiateOAuth(config: OAuthInitConfig) {
       return NextResponse.redirect(`${APP_URL}/dashboard/connectors?error=${encodeURIComponent('Non authentifie')}`)
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('client_id')
-      .eq('id', user.id)
+    const { data: client } = await supabase
+      .from('clients')
+      .select('id')
+      .eq('user_id', user.id)
       .single()
 
-    if (!profile?.client_id) {
+    if (!client?.id) {
       return NextResponse.redirect(`${APP_URL}/dashboard/connectors?error=${encodeURIComponent('Profil introuvable')}`)
     }
 
@@ -44,7 +44,7 @@ export async function initiateOAuth(config: OAuthInitConfig) {
     }
 
     const stateData = {
-      clientId: profile.client_id,
+      clientId: client.id,
       userId: user.id,
       nonce: crypto.randomBytes(16).toString('hex'),
     }

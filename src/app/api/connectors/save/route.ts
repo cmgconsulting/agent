@@ -13,14 +13,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Non authentifie' }, { status: 401 })
     }
 
-    // Get client_id from profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('client_id')
-      .eq('id', user.id)
+    // Get client_id from clients table
+    const { data: client } = await supabase
+      .from('clients')
+      .select('id')
+      .eq('user_id', user.id)
       .single()
 
-    if (!profile?.client_id) {
+    if (!client?.id) {
       return NextResponse.json({ error: 'Profil client introuvable' }, { status: 404 })
     }
 
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     const { data: existing } = await adminClient
       .from('connectors')
       .select('id')
-      .eq('client_id', profile.client_id)
+      .eq('client_id', client.id)
       .eq('type', connector_type)
       .single()
 
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
       const { error } = await adminClient
         .from('connectors')
         .insert({
-          client_id: profile.client_id,
+          client_id: client.id,
           type: connector_type,
           credentials_encrypted: encryptedCredentials,
           status: 'inactive',
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
         status: testResult.ok ? 'active' : 'inactive',
         last_tested_at: new Date().toISOString(),
       })
-      .eq('client_id', profile.client_id)
+      .eq('client_id', client.id)
       .eq('type', connector_type)
 
     return NextResponse.json({
